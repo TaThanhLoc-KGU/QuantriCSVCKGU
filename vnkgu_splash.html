@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WiFi – Trường Đại học Kiên Giang</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:   #0a1f44;
+      --blue:   #1458b8;
+      --teal:   #0e9e8e;
+      --gold:   #e8b84b;
+      --light:  #f4f7fc;
+      --white:  #ffffff;
+      --gray:   #8a97a8;
+      --text:   #1a2b45;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Decorative background geometry */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 20%, rgba(20,88,184,0.35) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(14,158,142,0.25) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .rings {
+      position: fixed;
+      top: -120px; right: -120px;
+      width: 500px; height: 500px;
+      pointer-events: none;
+      opacity: 0.12;
+    }
+    .rings circle {
+      fill: none;
+      stroke: var(--gold);
+      stroke-width: 1.5;
+      animation: spin 30s linear infinite;
+      transform-origin: 250px 250px;
+    }
+    .rings circle:nth-child(2) { animation-duration: 45s; animation-direction: reverse; }
+    .rings circle:nth-child(3) { animation-duration: 60s; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Card */
+    .card {
+      position: relative;
+      width: min(480px, 96vw);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 24px;
+      backdrop-filter: blur(24px);
+      padding: 48px 40px 40px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+      animation: rise 0.7s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes rise {
+      from { opacity:0; transform: translateY(32px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    /* Top stripe accent */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 40px; right: 40px; height: 3px;
+      background: linear-gradient(90deg, var(--teal), var(--gold), var(--blue));
+      border-radius: 0 0 4px 4px;
+    }
+
+    /* Logo area */
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .logo-icon {
+      width: 54px; height: 54px;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 8px 24px rgba(14,158,142,0.3);
+    }
+
+    .logo-icon svg { width: 28px; height: 28px; }
+
+    .logo-text { line-height: 1.2; }
+    .logo-text .abbr {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--white);
+      letter-spacing: 1px;
+    }
+    .logo-text .full {
+      font-size: 11px;
+      color: var(--gray);
+      font-weight: 300;
+      letter-spacing: 0.3px;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      margin: 0 0 28px;
+    }
+
+    /* Headline */
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: var(--white);
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .sub {
+      font-size: 13px;
+      color: var(--gray);
+      font-weight: 300;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    /* Info pills */
+    .pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+      font-weight: 400;
+    }
+
+    .pill svg { width: 14px; height: 14px; opacity: 0.7; }
+
+    /* Terms box */
+    .terms {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 24px;
+      max-height: 130px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.15) transparent;
+    }
+
+    .terms::-webkit-scrollbar { width: 4px; }
+    .terms::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+    .terms p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.8;
+      font-weight: 300;
+    }
+
+    .terms p + p { margin-top: 8px; }
+
+    /* Checkbox */
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 24px;
+      cursor: pointer;
+    }
+
+    .check-row input[type=checkbox] {
+      appearance: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 5px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .check-row input[type=checkbox]:checked {
+      background: var(--teal);
+      border-color: var(--teal);
+    }
+
+    .check-row input[type=checkbox]:checked::after {
+      content: '';
+      position: absolute;
+      left: 3px; top: 0px;
+      width: 6px; height: 10px;
+      border: 2px solid white;
+      border-top: none; border-left: none;
+      transform: rotate(45deg);
+    }
+
+    .check-row label {
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.6;
+      cursor: pointer;
+    }
+
+    .check-row label span { color: var(--gold); }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 8px 28px rgba(20,88,184,0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn:not(:disabled):hover { transform: translateY(-1px); opacity: 0.92; }
+    .btn:not(:disabled):active { transform: translateY(1px); }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      line-height: 1.7;
+    }
+
+    /* Success state */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+      animation: rise 0.5s ease both;
+    }
+
+    .success-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 0 12px rgba(14,158,142,0.12);
+    }
+
+    .success-icon svg { width: 30px; height: 30px; }
+
+    .success-screen h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    .success-screen p {
+      font-size: 13px;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    .progress-bar {
+      height: 3px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      margin-top: 24px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--teal), var(--gold));
+      border-radius: 3px;
+      transition: width 3s linear;
+    }
+  </style>
+</head>
+<body>
+
+<svg class="rings" viewBox="0 0 500 500">
+  <circle cx="250" cy="250" r="200"/>
+  <circle cx="250" cy="250" r="150"/>
+  <circle cx="250" cy="250" r="100"/>
+</svg>
+
+<div class="card" id="mainCard">
+
+  <!-- Logo -->
+  <div class="logo-area">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <div class="abbr">VNKGU</div>
+      <div class="full">Trường Đại học Kiên Giang</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Headline -->
+  <h1>Chào mừng bạn<br/>đến với WiFi VNKGU</h1>
+  <p class="sub">Kết nối internet miễn phí dành cho sinh viên, giảng viên và khách thăm trường.</p>
+
+  <!-- Info pills -->
+  <div class="pills">
+    <div class="pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6l11 6 11-6M1 6v12l11 6 11-6V6"/></svg>
+      Miễn phí
+    </div>
+    <div class="pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Phiên 4 giờ
+    </div>
+    <div class="pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      WPA2 Secure
+    </div>
+  </div>
+
+  <!-- Terms -->
+  <div class="terms">
+    <p><strong style="color:rgba(255,255,255,0.7)">Điều khoản sử dụng WiFi</strong></p>
+    <p>Mạng WiFi này được cung cấp bởi Trường Đại học Kiên Giang phục vụ mục đích học tập, nghiên cứu và công tác.</p>
+    <p>Người dùng cam kết không truy cập nội dung vi phạm pháp luật Việt Nam, không phát tán virus, mã độc, không thực hiện các hành vi tấn công mạng dưới bất kỳ hình thức nào.</p>
+    <p>Nhà trường có quyền ghi nhật ký truy cập nhằm đảm bảo an toàn hệ thống và cung cấp cho cơ quan chức năng khi có yêu cầu theo quy định pháp luật.</p>
+    <p>Băng thông có thể bị giới hạn trong giờ cao điểm nhằm đảm bảo chất lượng dịch vụ đồng đều cho tất cả người dùng.</p>
+  </div>
+
+  <!-- Checkbox -->
+  <label class="check-row">
+    <input type="checkbox" id="agreeCheck" onchange="toggleBtn()"/>
+    <label for="agreeCheck">Tôi đã đọc và đồng ý với <span>Điều khoản sử dụng</span> của Trường Đại học Kiên Giang.</label>
+  </label>
+
+  <!-- CTA -->
+  <button class="btn" id="connectBtn" disabled onclick="handleConnect()">
+    Kết nối Internet
+  </button>
+
+  <div class="footer">
+    Trường Đại học Kiên Giang &nbsp;·&nbsp; Phòng Quản trị Cơ sở Vật chất<br/>
+    Hỗ trợ: it-support@vnkgu.edu.vn
+  </div>
+
+  <!-- Success screen (hidden initially) -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+    <h2>Kết nối thành công!</h2>
+    <p>Đang chuyển đến trang web của trường...<br/>Vui lòng chờ trong giây lát.</p>
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleBtn() {
+    const cb = document.getElementById('agreeCheck');
+    document.getElementById('connectBtn').disabled = !cb.checked;
+  }
+
+  function handleConnect() {
+    // Hide form, show success
+    const card = document.getElementById('mainCard');
+    const mainContent = card.querySelectorAll(':not(.success-screen)');
+    mainContent.forEach(el => { if (el !== card) el.style.display = 'none'; });
+
+    const ss = document.getElementById('successScreen');
+    ss.style.display = 'block';
+
+    // Animate progress bar
+    setTimeout(() => {
+      document.getElementById('progressFill').style.width = '100%';
+    }, 100);
+
+    // Get redirect URL from query params (CBW passes ?redirect_url=...)
+    const params = new URLSearchParams(window.location.search);
+    const redirectUrl = params.get('redirect_url') || params.get('redirect') || 'https://www.vnkgu.edu.vn/trang-chu';
+
+    // Redirect after 3 seconds
+    setTimeout(() => {
+      window.location.href = redirectUrl;
+    }, 3200);
+  }
+</script>
+</body>
+</html>
