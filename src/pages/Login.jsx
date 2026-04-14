@@ -40,7 +40,7 @@ export default function Login() {
 
         <div className="mt-12 pt-8 border-t border-gray-100">
            <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">
-             Hệ thống nội bộ trường đại học
+             Hệ thống nội bộ Phòng Quản trị cơ sở vật chất
            </p>
         </div>
       </motion.div>
