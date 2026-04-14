@@ -1,162 +1,136 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { YearNode } from '@/components/tree/YearNode'
 import { Topbar } from '@/components/layout/Topbar'
-import { Avatar } from '@/components/ui/Avatar'
+import { YearNode } from '@/components/tree/YearNode'
+import { MemberTable } from '@/components/dashboard/MemberTable'
 import { addTask } from '@/lib/firestore'
-import { pageVariants, pageTransition } from '@/lib/animations'
-import MindMapView from '@/components/mindmap/MindMapView'
+import { pageVariants } from '@/lib/animations'
+import { Plus, LayoutGrid, List, CheckCircle2, ChevronDown } from 'lucide-react'
 
-const curMonth   = new Date().getMonth() + 1
-const curQuarter = Math.ceil(curMonth / 3)
-const MONTHS     = Array.from({ length: 12 }, (_, i) => i + 1)
+const currentYear = new Date().getFullYear()
+const YEAR_OPTIONS = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i)
 
-/* ── Quick-add bar ──────────────────────────────────────────── */
-function QuickAddBar({ member }) {
-  const [title, setTitle]   = useState('')
-  const [month, setMonth]   = useState(curMonth)
+/* ── Quick Add ──────────────────────────────────────────────── */
+function QuickAddBar({ member, year }) {
+  const [title, setTitle] = useState('')
   const [saving, setSaving] = useState(false)
-  const [ok, setOk]         = useState(false)
 
   const submit = async (e) => {
     e.preventDefault()
     if (!title.trim() || !member) return
     setSaving(true)
     await addTask({
-      title:    title.trim(),
+      title: title.trim(),
       memberId: member.id,
-      scope:    'member',
-      year:     2026,
-      quarter:  Math.ceil(month / 3),
-      month,
-      status:   'none',
+      scope: 'member',
+      year,
+      month: new Date().getMonth() + 1,
+      quarter: Math.ceil((new Date().getMonth() + 1) / 3),
+      status: 'none'
     })
     setTitle('')
     setSaving(false)
-    setOk(true)
-    setTimeout(() => setOk(false), 1400)
   }
 
   return (
-    <form onSubmit={submit}
-      className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 border-b border-gray-700 shrink-0">
-      <input
-        value={title}
-        onChange={e => setTitle(e.target.value)}
-        placeholder="Thêm nhiệm vụ mới... (nhấn Enter để thêm nhanh)"
-        className="flex-1 min-w-0 bg-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200
-                   placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-      />
-      <select
-        value={month}
-        onChange={e => setMonth(+e.target.value)}
-        className="shrink-0 bg-gray-800 border border-gray-700 rounded-lg px-2 py-2 text-xs text-gray-400
-                   outline-none focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer"
-      >
-        {MONTHS.map(m => (
-          <option key={m} value={m}>T{m}{m === curMonth ? ' ✓' : ''}</option>
-        ))}
-      </select>
-      <button
-        type="submit"
-        disabled={!title.trim() || saving || !member}
-        className="shrink-0 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white
-                   text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
-      >
-        {ok ? '✓' : saving ? '...' : '+ Thêm'}
+    <form onSubmit={submit} className="flex gap-2 p-4 bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
+      <div className="flex-1 relative">
+        <Plus size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <input value={title} onChange={e => setTitle(e.target.value)}
+          placeholder={`Thêm nhiệm vụ mới năm ${year}... (Nhấn Enter)`}
+          className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+        />
+      </div>
+      <button type="submit" disabled={!title.trim() || saving} className="btn-primary flex items-center gap-2 px-6">
+        {saving ? '...' : 'Thêm nhanh'}
       </button>
     </form>
   )
 }
 
-/* ── Main view ──────────────────────────────────────────────── */
-export default function MyTasksView({ tasks, currentMember }) {
-  const [viewMode, setViewMode] = useState('tree')
+/* ── Year Picker ─────────────────────────────────────────────── */
+function YearPicker({ year, onChange }) {
+  return (
+    <div className="relative">
+      <select value={year} onChange={e => onChange(Number(e.target.value))}
+        className="appearance-none pl-3 pr-8 py-1.5 bg-gray-100 border border-gray-200 rounded-lg text-xs font-black text-gray-600 outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer">
+        {YEAR_OPTIONS.map(y => (
+          <option key={y} value={y}>Năm {y}</option>
+        ))}
+      </select>
+      <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+    </div>
+  )
+}
 
-  const myTasks = tasks.filter(t => t.memberId === currentMember?.id)
-  const done    = myTasks.filter(t => t.status === 'done').length
-  const doing   = myTasks.filter(t => t.status === 'doing').length
-  const wait    = myTasks.filter(t => t.status === 'wait').length
+/* ── Main View ──────────────────────────────────────────────── */
+export default function MyTasksView({ tasks, currentMember, members }) {
+  const [viewMode, setViewMode] = useState('tree')
+  const [filter,   setFilter]   = useState('all')
+  const [year,     setYear]     = useState(currentYear)
+
+  const myTasks  = tasks.filter(t => t.memberId === currentMember?.id && t.year === year)
+  const filtered = myTasks.filter(t => {
+    if (filter === 'doing') return t.status !== 'done'
+    if (filter === 'done')  return t.status === 'done'
+    return true
+  })
 
   const stats = [
-    { label: 'nhiệm vụ',       value: myTasks.length, color: '#9ca3af' },
-    { label: 'hoàn thành',     value: done,            color: '#6fcf97' },
-    { label: 'đang thực hiện', value: doing,           color: '#4f8ef7' },
-    { label: 'chờ duyệt',      value: wait,            color: '#f2994a' },
+    { label: 'Tổng số',     value: myTasks.length,                              color: '#3b82f6' },
+    { label: 'Hoàn thành',  value: myTasks.filter(t => t.status === 'done').length, color: '#10b981' },
   ]
 
   return (
-    <motion.div className="flex-1 flex flex-col min-h-0" key="my-tasks"
-      initial="initial" animate="in" exit="out"
-      variants={pageVariants} transition={pageTransition}>
+    <motion.div className="flex-1 flex flex-col h-full bg-gray-50/50"
+      variants={pageVariants} initial="initial" animate="in" exit="out">
 
-      <Topbar
-        title={
-          currentMember
-            ? (
-              <span className="flex items-center gap-2">
-                <Avatar name={currentMember.name} color={currentMember.color || 0} size="sm" />
-                <span>Việc của tôi</span>
-                <span className="text-xs font-normal text-gray-500 hidden md:inline">
-                  — {currentMember.name}
-                </span>
-              </span>
-            )
-            : 'Việc của tôi'
-        }
-        stats={stats}
-      >
-        {/* View toggle */}
-        <div className="flex items-center gap-1 bg-gray-800 border border-gray-700 rounded-lg p-0.5 shrink-0">
-          {[
-            { id: 'tree', icon: '🌳', label: 'Cây' },
-            { id: 'map',  icon: '🗺️', label: 'Sơ đồ' },
-          ].map(v => (
-            <button key={v.id} onClick={() => setViewMode(v.id)}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
-                viewMode === v.id ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-200'
-              }`}>
-              <span>{v.icon}</span>
-              <span className="hidden sm:inline">{v.label}</span>
-            </button>
-          ))}
+      <Topbar title="Việc của tôi" stats={stats}>
+        <div className="flex items-center gap-3">
+          <YearPicker year={year} onChange={setYear} />
+          <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
+            {[
+              { id: 'tree',  icon: LayoutGrid, label: 'Theo Quý' },
+              { id: 'table', icon: List,       label: 'Bảng' }
+            ].map(v => (
+              <button key={v.id} onClick={() => setViewMode(v.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                  viewMode === v.id ? 'bg-white text-blue-600 shadow-sm scale-105' : 'text-gray-400 hover:text-gray-800'
+                }`}>
+                <v.icon size={12} strokeWidth={3} />
+                <span className="hidden sm:inline">{v.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </Topbar>
 
-      {/* Persistent quick-add bar */}
-      {viewMode === 'tree' && <QuickAddBar member={currentMember} />}
+      <QuickAddBar member={currentMember} year={year} />
 
-      <div className="flex-1 overflow-y-auto min-h-0">
-        <AnimatePresence mode="wait">
-          {viewMode === 'tree' ? (
-            <motion.div key="tree" className="p-4"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}>
-              {!currentMember ? (
-                <div className="text-center py-20 text-gray-500 text-sm">
-                  Chưa có hồ sơ — vui lòng đăng xuất và đăng nhập lại.
+      <div className="flex-1 overflow-y-auto p-6">
+        {!myTasks.length ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle2 size={32} />
+            </div>
+            <p className="text-sm font-bold text-gray-900">Chưa có nhiệm vụ nào — Năm {year}</p>
+            <p className="text-xs text-gray-500 mt-1">Hãy thêm nhiệm vụ đầu tiên.</p>
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            {viewMode === 'tree' ? (
+              <motion.div key="tree" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <YearNode year={year} tasks={filtered} />
+              </motion.div>
+            ) : (
+              <motion.div key="table" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <div className="bg-white border border-gray-200 rounded-3xl shadow-xl overflow-hidden">
+                  <MemberTable members={[currentMember]} tasks={tasks.filter(t => t.year === year)} onSelectMember={() => {}} />
                 </div>
-              ) : myTasks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-                  <span className="text-5xl opacity-60">📋</span>
-                  <p className="text-gray-400 font-medium">Chưa có nhiệm vụ nào</p>
-                  <p className="text-gray-500 text-xs">Gõ nhiệm vụ vào ô phía trên và nhấn Enter để thêm nhanh!</p>
-                </div>
-              ) : (
-                <YearNode year={2026} tasks={myTasks} memberId={currentMember.id} />
-              )}
-            </motion.div>
-          ) : (
-            <motion.div key="map" className="h-full"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}>
-              <MindMapView
-                tasks={myTasks}
-                members={currentMember ? [currentMember] : []}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </div>
     </motion.div>
   )

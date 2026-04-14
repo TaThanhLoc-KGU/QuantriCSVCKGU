@@ -1,7 +1,7 @@
 import {
   collection, addDoc, updateDoc, deleteDoc,
   doc, serverTimestamp, getDocs, query, where,
-  getDoc, setDoc
+  getDoc, setDoc, writeBatch
 } from 'firebase/firestore'
 import { db } from './firebase'
 

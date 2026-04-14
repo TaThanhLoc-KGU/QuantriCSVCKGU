@@ -1,81 +1,80 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useUserProfile } from '@/hooks/useUserProfile'
 import { useAuth } from '@/hooks/useAuth'
-
-const ROLES = ['Trưởng phòng', 'Phó phòng', 'Chuyên viên']
+import { useMembers } from '@/hooks/useMembers'
+import { setUserProfile } from '@/lib/firestore'
+import { Avatar } from '@/components/ui/Avatar'
+import { CheckCircle2, UserCircle } from 'lucide-react'
 
 export default function Onboarding() {
-  const { saveProfile } = useUserProfile()
-  const { user, logout } = useAuth()
-  const [name, setName] = useState(user?.displayName || '')
-  const [role, setRole] = useState('Chuyên viên')
-  const [saving, setSaving] = useState(false)
+  const { user }    = useAuth()
+  const { members } = useMembers()
+  const [memberId, setMemberId] = useState('')
+  const [saving, setSaving]     = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!name.trim()) return
+    if (!memberId || !user) return
     setSaving(true)
-    try {
-      await saveProfile({ name: name.trim(), role })
-    } catch {
-      setSaving(false)
-    }
+    await setUserProfile(user.uid, { memberId, email: user.email })
+    window.location.reload()
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
       <motion.div
-        className="bg-gray-900 border border-gray-700 rounded-2xl p-8 w-full max-w-sm shadow-2xl"
-        initial={{ opacity: 0, scale: 0.94, y: 24 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="bg-white border border-gray-200 rounded-[2.5rem] p-12 w-full max-w-lg shadow-xl"
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
       >
-        <div className="text-center mb-6">
-          <div className="text-5xl mb-3">👋</div>
-          <h1 className="text-xl font-bold text-gray-50">Chào mừng!</h1>
-          <p className="text-sm text-gray-400 mt-1 leading-relaxed">
-            Đây là lần đầu bạn đăng nhập.<br />Hãy điền thông tin để bắt đầu.
-          </p>
+        <div className="flex items-center gap-3 mb-8">
+           <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shadow-inner">
+              <UserCircle size={28} />
+           </div>
+           <div>
+              <h1 className="text-xl font-black text-gray-900 tracking-tight">Xác nhận danh tính</h1>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Bước cuối cùng để bắt đầu</p>
+           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="form-label">Họ và tên *</label>
-            <input
-              className="form-input"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="VD: Nguyễn Văn An"
-              autoFocus
-            />
-          </div>
-          <div>
-            <label className="form-label">Chức vụ</label>
-            <select
-              className="form-input"
-              value={role}
-              onChange={e => setRole(e.target.value)}
-            >
-              {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
+        <p className="text-sm text-gray-600 mb-8 leading-relaxed">
+          Chào mừng bạn đến với hệ thống QTCSVC. Vui lòng chọn hồ sơ nhân sự của bạn trong danh sách dưới đây để liên kết tài khoản.
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-100 rounded-2xl bg-gray-50/50">
+            {members.map((m) => {
+              const selected = memberId === m.id
+              return (
+                <label key={m.id}
+                  className={`flex items-center gap-4 px-4 py-3 rounded-xl border-2 transition-all cursor-pointer ${
+                    selected 
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/20' 
+                      : 'bg-white border-gray-100 text-gray-700 hover:border-gray-200 shadow-sm'
+                  }`}
+                >
+                  <input type="radio" className="hidden" name="member" value={m.id}
+                    onChange={() => setMemberId(m.id)} checked={selected} />
+                  <Avatar name={m.name} color={m.color || 0} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-bold truncate ${selected ? 'text-white' : 'text-gray-900'}`}>{m.name}</p>
+                    <p className={`text-[10px] font-medium uppercase tracking-tighter ${selected ? 'text-blue-100' : 'text-gray-400'}`}>
+                      {m.role || 'Nhân sự'}
+                    </p>
+                  </div>
+                  {selected && <CheckCircle2 size={18} className="text-white" />}
+                </label>
+              )
+            })}
           </div>
 
           <button
             type="submit"
-            disabled={saving || !name.trim()}
-            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            disabled={!memberId || saving}
+            className="w-full btn-primary py-4 text-sm font-black uppercase tracking-widest shadow-blue-600/20 disabled:opacity-30"
           >
-            {saving ? 'Đang lưu...' : 'Bắt đầu làm việc →'}
+            {saving ? 'Đang xử lý...' : 'Vào hệ thống'}
           </button>
         </form>
-
-        <button
-          onClick={logout}
-          className="w-full mt-3 text-xs text-gray-600 hover:text-gray-400 transition-colors text-center py-1"
-        >
-          Đăng xuất
-        </button>
       </motion.div>
     </div>
   )

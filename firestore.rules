@@ -6,6 +6,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    match /users/{uid} {
+      allow read, write: if isAuthenticated() && request.auth.uid == uid;
+    }
+
     match /members/{memberId} {
       allow read:  if isAuthenticated();
       allow write: if isAuthenticated();
@@ -19,6 +23,16 @@ service cloud.firestore {
     }
 
     match /steps/{stepId} {
+      allow read:  if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    match /reports/{reportId} {
+      allow read:  if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    match /documents/{docId} {
       allow read:  if isAuthenticated();
       allow write: if isAuthenticated();
     }
