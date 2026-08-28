@@ -1,0 +1,12 @@
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / stray local artifacts
+*.log
+*.cookies*.txt

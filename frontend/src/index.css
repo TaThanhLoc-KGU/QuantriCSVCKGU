@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+
+  /* Xanh duong - thuong hieu chinh: header, nav, nut chinh, lien ket */
+  --color-brand-50: #eaf1f9;
+  --color-brand-100: #cfe1f0;
+  --color-brand-200: #a3c5e2;
+  --color-brand-300: #77a9d4;
+  --color-brand-400: #4b8dc6;
+  --color-brand-500: #2d72ac;
+  --color-brand-600: #1d5c94;
+  --color-brand-700: #164871;
+  --color-brand-800: #10344f;
+  --color-brand-900: #0a2135;
+
+  /* Xanh la dam - diem nhan phu: con hieu luc, nhan, hover */
+  --color-accent-50: #eaf4ec;
+  --color-accent-100: #cce4d1;
+  --color-accent-200: #9bcaa6;
+  --color-accent-300: #6bb07c;
+  --color-accent-400: #479760;
+  --color-accent-500: #35804d;
+  --color-accent-600: #256640;
+  --color-accent-700: #1b4e30;
+  --color-accent-800: #133923;
+  --color-accent-900: #0b2416;
+
+  /* Xam trung tinh: nen, vien, chu phu */
+  --color-neutral-50: #f7f8f9;
+  --color-neutral-100: #eef0f2;
+  --color-neutral-200: #dde1e5;
+  --color-neutral-300: #c3c9d0;
+  --color-neutral-400: #9aa3ac;
+  --color-neutral-500: #6b7480;
+  --color-neutral-600: #4e5560;
+  --color-neutral-700: #383d46;
+  --color-neutral-800: #23262c;
+  --color-neutral-900: #15171b;
+
+  /* Do khan cap - chi dung cho canh bao/thong bao khan */
+  --color-urgent-50: #fbeaea;
+  --color-urgent-500: #b3352f;
+  --color-urgent-600: #962b26;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-neutral-50);
+  color: var(--color-neutral-800);
+}
+
+::selection {
+  background-color: var(--color-brand-200);
+  color: var(--color-brand-900);
+}
+
+.prose-content {
+  line-height: 1.75;
+}
+
+.prose-content p {
+  margin-bottom: 1rem;
+}
+
+.prose-content h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-neutral-900);
+}
+
+.prose-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-neutral-900);
+}
+
+.prose-content ul,
+.prose-content ol {
+  margin: 0 0 1rem 1.5rem;
+}
+
+.prose-content ul {
+  list-style: disc;
+}
+
+.prose-content ol {
+  list-style: decimal;
+}
+
+.prose-content a {
+  color: var(--color-brand-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose-content img {
+  border-radius: 0.375rem;
+  margin: 1rem 0;
+  max-width: 100%;
+  height: auto;
+}
+
+.prose-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.prose-content th,
+.prose-content td {
+  border: 1px solid var(--color-neutral-200);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+/* Chuyen dong vao trang - mot khoanh khac duy nhat, ap dung cho khoi noi dung dau moi trang */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+  }
+}
+
+/* Zoom cham cho anh banner - chi bat khi khong prefers-reduced-motion (kiem tra o JS) */
+@keyframes ken-burns {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.animate-ken-burns {
+  animation: ken-burns 8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Hoa tiet luoi ban ve - goi nhac ha tang/co so vat chat, dung cho nen PageHero */
+.blueprint-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, white 8%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, white 8%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+}

@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: qtcsvc
+
+  # backend/compose.yaml co ca postgres, mysql, mariadb -> Spring Boot Docker Compose
+  # se dang ky nhieu JdbcConnectionDetails ung vien gay xung dot khi khoi dong.
+  # Dev dung root docker-compose.yml (chi postgres + minio) va chay app rieng.
+  docker:
+    compose:
+      enabled: false
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/qtcsvc
+    username: qtcsvc
+    password: qtcsvc
+
+  flyway:
+    locations: classpath:db/migration
+
+  ai:
+    # Khong dung ChatModel autoconfigure tinh: API key AI do ADMIN nhap qua
+    # Settings (luu ma hoa trong system_settings), module report se tu dung
+    # Client/ChatModel luc goi dua tren cau hinh doc tu DB (xem spec 8.3).
+    model:
+      chat: none
+
+  session:
+    store-type: jdbc
+    jdbc:
+      # schema da co san trong Flyway migration V1__spring_session_schema.sql
+      initialize-schema: never
+
+  batch:
+    jdbc:
+      # schema da co san trong Flyway migration V10__spring_batch_schema.sql
+      initialize-schema: never
+
+  # Khai bao registration "google" o day se bi spring-boot-starter-oauth2-client
+  # validate ngay luc khoi dong (bat buoc client-id/secret non-empty), du chua dung toi.
+  # Se bat lai cung gia tri that (GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET) khi lam SSO
+  # trong module identity.
+  # security:
+  #   oauth2:
+  #     client:
+  #       registration:
+  #         google:
+  #           client-id: ${GOOGLE_CLIENT_ID}
+  #           client-secret: ${GOOGLE_CLIENT_SECRET}
+  #           scope:
+  #             - openid
+  #             - email
+  #             - profile
+
+app:
+  minio:
+    endpoint: http://localhost:9000
+    access-key: ${MINIO_ACCESS_KEY:qtcsvc}
+    secret-key: ${MINIO_SECRET_KEY:qtcsvc123}
+    bucket: qtcsvc
+  security:
+    # AES key dung de ma hoa gia tri secret trong system_settings (vd ai.apiKey)
+    settings-secret-key: ${APP_SETTINGS_SECRET_KEY:}
+  sso:
+    default-allowed-domain: vnkgu.edu.vn
+  congvan:
+    # Doc rieng (read-only) van ban den tu he thong Cong van (SQL Server rieng
+    # biet, khong lien quan Postgres chinh) de doi chieu - xem module
+    # congvanlink. Khong dung Spring datasource auto-config de tranh xung dot
+    # voi DataSource chinh (Postgres) - xem CongVanRepository.
+    jdbc-url: ${CONGVAN_JDBC_URL:jdbc:sqlserver://localhost:60020;databaseName=congvan.vnkgu.edu.vn;integratedSecurity=true;trustServerCertificate=true;encrypt=false;}
+    ma-dv: ${CONGVAN_MA_DV:24}
+
+server:
+  port: 8080
