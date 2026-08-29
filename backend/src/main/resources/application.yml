@@ -69,6 +69,11 @@ app:
     # voi DataSource chinh (Postgres) - xem CongVanRepository.
     jdbc-url: ${CONGVAN_JDBC_URL:jdbc:sqlserver://localhost:60020;databaseName=congvan.vnkgu.edu.vn;integratedSecurity=true;trustServerCertificate=true;encrypt=false;}
     ma-dv: ${CONGVAN_MA_DV:24}
+    # Xac thuc bang tai khoan SQL Server (thay the Windows Integrated Auth de
+    # chay duoc tren production Linux) - de trong = giu nguyen kieu xac thuc
+    # khai bao trong jdbc-url o tren (vd Windows Auth luc dev local).
+    db-username: ${CONGVAN_DB_USERNAME:}
+    db-password: ${CONGVAN_DB_PASSWORD:}
     # API cong khai (chi doc, khong can dang nhap) cua he thong Cong van cho
     # van ban DI da duoc van thu gan "dau cong khai" - chay tren cung server
     # (100.110.62.27) nen dung 127.0.0.1 lam mac dinh khi be chay tren do.

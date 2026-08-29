@@ -42,9 +42,21 @@ class CongVanRepository {
     private final int maDv;
 
     CongVanRepository(@Value("${app.congvan.jdbc-url}") String jdbcUrl,
-                       @Value("${app.congvan.ma-dv}") int maDv) {
+                       @Value("${app.congvan.ma-dv}") int maDv,
+                       @Value("${app.congvan.db-username:}") String dbUsername,
+                       @Value("${app.congvan.db-password:}") String dbPassword) {
         SQLServerDataSource dataSource = new SQLServerDataSource();
         dataSource.setURL(jdbcUrl);
+        // Xac thuc bang tai khoan SQL Server (username/password) neu duoc cau
+        // hinh - hoat dong tren moi he dieu hanh, khac voi Windows Integrated
+        // Auth (integratedSecurity=true trong jdbc-url) chi chay tren Windows
+        // vi can thu vien native (mssql-jdbc_auth). Neu khong cau hinh, giu
+        // nguyen kieu xac thuc da khai bao san trong jdbc-url (vd dev local).
+        if (!dbUsername.isBlank()) {
+            dataSource.setUser(dbUsername);
+            dataSource.setPassword(dbPassword);
+            dataSource.setIntegratedSecurity(false);
+        }
         this.jdbc = new JdbcTemplate(dataSource);
         this.maDv = maDv;
     }
