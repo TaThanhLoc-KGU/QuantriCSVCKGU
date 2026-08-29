@@ -10,4 +10,8 @@ public class ExternalServiceException extends RuntimeException {
         super(message, cause);
     }
 
+    public ExternalServiceException(String message) {
+        super(message);
+    }
+
 }

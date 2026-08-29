@@ -55,3 +55,40 @@ export function CheckCircleIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IdCardIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg aria-hidden="true" {...base} {...props}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="8.5" cy="11" r="2" />
+      <path d="M5.5 16c.5-1.7 1.8-2.5 3-2.5s2.5.8 3 2.5" />
+      <path d="M14 10h6M14 13.5h4" />
+    </svg>
+  );
+}
+
+export function UploadCloudIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg aria-hidden="true" {...base} {...props}>
+      <path d="M7 17.5a4 4 0 0 1-.5-7.97 5 5 0 0 1 9.63-1.83A4.5 4.5 0 0 1 17.5 17.5H7Z" />
+      <path d="M12 10.5v6.5m0-6.5-2.3 2.3M12 10.5l2.3 2.3" />
+    </svg>
+  );
+}
+
+export function SearchIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg aria-hidden="true" {...base} {...props}>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m20 20-4.3-4.3" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg aria-hidden="true" {...base} {...props}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}

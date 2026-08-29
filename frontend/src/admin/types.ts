@@ -160,6 +160,31 @@ export interface CongVanIncomingDocument {
   coFile: boolean;
 }
 
+export type AccountRecoveryStatus = "MOI" | "DA_XU_LY" | "TU_CHOI";
+
+export interface AccountRecoveryRequest {
+  id: number;
+  caseCode: string;
+  fullName: string;
+  email: string | null;
+  phone: string | null;
+  isNewStudent: boolean;
+  studentId: string;
+  cccdNumber: string | null;
+  classCode: string | null;
+  unitName: string | null;
+  screenshotUrl: string | null;
+  screenshotName: string | null;
+  idCardUrl: string | null;
+  idCardName: string | null;
+  status: AccountRecoveryStatus;
+  adminNote: string | null;
+  resultMessage: string | null;
+  createdAt: string;
+  processedAt: string | null;
+  processedBy: number | null;
+}
+
 export const REPORT_SECTION_LABELS: Record<string, string> = {
   "muc1": "I. Đặc điểm tình hình",
   "muc2": "II. Công tác chỉ đạo, điều hành",

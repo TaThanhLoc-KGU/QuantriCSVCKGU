@@ -1,4 +1,6 @@
 import type {
+  AccountRecoveryRequest,
+  AccountRecoveryStatus,
   AdminUser,
   CongVanIncomingDocument,
   DocumentNumber,
@@ -358,5 +360,15 @@ export const adminApi = {
       getJson(withQuery("/api/admin/congvan/incoming", { year })),
     createTask: (mscv: string, year: number): Promise<TaskView> =>
       postJson(withQuery(`/api/admin/congvan/incoming/${encodeURIComponent(mscv)}/create-task`, { year }), {}),
+  },
+
+  accountRecovery: {
+    list: (): Promise<AccountRecoveryRequest[]> => getJson("/api/admin/account-recovery"),
+    updateStatus: (id: number, status: AccountRecoveryStatus, adminNote?: string | null): Promise<AccountRecoveryRequest> =>
+      patchJson(`/api/admin/account-recovery/${id}/status`, { status, adminNote: adminNote ?? null }),
+    sendResult: (id: number, subject: string, body: string): Promise<AccountRecoveryRequest> =>
+      postJson(`/api/admin/account-recovery/${id}/send-result`, { subject, body }),
+    screenshotUrl: (id: number): string => `/api/admin/account-recovery/${id}/screenshot`,
+    idCardUrl: (id: number): string => `/api/admin/account-recovery/${id}/id-card`,
   },
 };

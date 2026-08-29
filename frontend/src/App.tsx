@@ -8,6 +8,8 @@ import { FormsPage } from "./pages/FormsPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
 import { DisclosuresPage } from "./pages/DisclosuresPage";
 import { SubmitDocumentPage } from "./pages/SubmitDocumentPage";
+import { AccountRecoveryPage } from "./pages/AccountRecoveryPage";
+import { AccountRecoveryLookupPage } from "./pages/AccountRecoveryLookupPage";
 import { SearchPage } from "./pages/SearchPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { AuthProvider } from "./admin/AuthContext";
@@ -31,6 +33,9 @@ const DocumentNumbersPage = lazy(() =>
   import("./admin/pages/DocumentNumbersPage").then((m) => ({ default: m.DocumentNumbersPage })),
 );
 const CongVanPage = lazy(() => import("./admin/pages/CongVanPage").then((m) => ({ default: m.CongVanPage })));
+const AccountRecoveryAdminPage = lazy(() =>
+  import("./admin/pages/AccountRecoveryPage").then((m) => ({ default: m.AccountRecoveryPage })),
+);
 const TasksPage = lazy(() => import("./admin/pages/TasksPage").then((m) => ({ default: m.TasksPage })));
 const ReportsPage = lazy(() => import("./admin/pages/ReportsPage").then((m) => ({ default: m.ReportsPage })));
 const UsersPage = lazy(() => import("./admin/pages/UsersPage").then((m) => ({ default: m.UsersPage })));
@@ -57,6 +62,8 @@ function App() {
           <Route path="thong-bao" element={<NotificationsPage />} />
           <Route path="cong-khai" element={<DisclosuresPage />} />
           <Route path="gui-van-ban" element={<SubmitDocumentPage />} />
+          <Route path="khoi-phuc-tai-khoan" element={<AccountRecoveryPage />} />
+          <Route path="tra-cuu-ket-qua" element={<AccountRecoveryLookupPage />} />
           <Route path="tim-kiem" element={<SearchPage />} />
         </Route>
 
@@ -87,6 +94,7 @@ function App() {
             <Route path="van-ban" element={<DocumentNumbersPage />} />
             <Route path="loai-van-ban" element={<DocumentTypesPage />} />
             <Route path="doi-chieu-cong-van" element={<CongVanPage />} />
+            <Route path="khoi-phuc-tai-khoan" element={<AccountRecoveryAdminPage />} />
             <Route path="nhiem-vu" element={<TasksPage />} />
             <Route path="bao-cao" element={<ReportsPage />} />
             <Route element={<ProtectedRoute roles={["ADMIN"]} />}>

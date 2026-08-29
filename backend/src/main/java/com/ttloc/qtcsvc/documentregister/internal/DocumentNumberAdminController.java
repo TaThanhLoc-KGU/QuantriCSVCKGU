@@ -3,6 +3,7 @@ package com.ttloc.qtcsvc.documentregister.internal;
 import com.ttloc.qtcsvc.documentregister.DocumentNumber;
 import com.ttloc.qtcsvc.identity.CurrentUserService;
 import com.ttloc.qtcsvc.shared.FileStorageService;
+import com.ttloc.qtcsvc.shared.FileTypeSupport;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -75,18 +76,6 @@ class DocumentNumberAdminController {
         return ResponseEntity.noContent().build();
     }
 
-    // Cac dinh dang trinh duyet tu hien thi duoc (mo truc tiep trong tab moi
-    // qua Content-Disposition: inline). Word/Excel khong co trinh xem tich
-    // hop trong trinh duyet nen van tai ve nhu binh thuong (attachment).
-    private static final Map<String, MediaType> INLINE_VIEWABLE_TYPES = Map.of(
-            "pdf", MediaType.APPLICATION_PDF,
-            "jpg", MediaType.IMAGE_JPEG,
-            "jpeg", MediaType.IMAGE_JPEG,
-            "png", MediaType.IMAGE_PNG,
-            "gif", MediaType.IMAGE_GIF,
-            "webp", MediaType.valueOf("image/webp")
-    );
-
     @GetMapping("/{id}/attachment")
     ResponseEntity<InputStreamResource> attachment(@PathVariable Long id) {
         DocumentNumber dn = service.get(id);
@@ -95,9 +84,9 @@ class DocumentNumberAdminController {
         }
         InputStreamResource body = new InputStreamResource(fileStorage.open(dn.attachmentUrl()));
         String filename = dn.attachmentName() != null ? dn.attachmentName() : "dinh-kem";
-        String ext = filename.contains(".") ? filename.substring(filename.lastIndexOf('.') + 1).toLowerCase() : "";
-        MediaType mediaType = INLINE_VIEWABLE_TYPES.getOrDefault(ext, MediaType.APPLICATION_OCTET_STREAM);
-        String disposition = INLINE_VIEWABLE_TYPES.containsKey(ext) ? "inline" : "attachment";
+        var inlineType = FileTypeSupport.inlineMediaType(filename);
+        MediaType mediaType = inlineType.orElse(MediaType.APPLICATION_OCTET_STREAM);
+        String disposition = inlineType.isPresent() ? "inline" : "attachment";
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .header(HttpHeaders.CONTENT_DISPOSITION, disposition + "; filename=\"" + filename + "\"")

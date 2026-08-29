@@ -46,6 +46,16 @@ export function SiteFooter() {
                 Công khai mua sắm
               </Link>
             </li>
+            <li>
+              <Link to="/khoi-phuc-tai-khoan" className="hover:text-white hover:underline">
+                Hỗ trợ khôi phục tài khoản
+              </Link>
+            </li>
+            <li>
+              <Link to="/tra-cuu-ket-qua" className="hover:text-white hover:underline">
+                Tra cứu kết quả xử lý
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

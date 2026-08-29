@@ -10,3 +10,4 @@ Thumbs.db
 # Logs / stray local artifacts
 *.log
 *.cookies*.txt
+qtcsvc-dist.zip

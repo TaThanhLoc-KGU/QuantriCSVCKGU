@@ -69,6 +69,28 @@ async function postForm<T>(path: string, formData: FormData): Promise<T> {
   return (await res.json()) as T;
 }
 
+async function postJson<T>(path: string, body: unknown): Promise<T> {
+  if (!readCookie("XSRF-TOKEN")) {
+    await fetch("/api/auth/csrf", { credentials: "include" });
+  }
+  const token = readCookie("XSRF-TOKEN");
+  const headers = new Headers({ "Content-Type": "application/json" });
+  if (token) headers.set("X-XSRF-TOKEN", token);
+
+  const res = await fetch(path, { method: "POST", body: JSON.stringify(body), headers, credentials: "include" });
+  if (!res.ok) {
+    let detail = `Yêu cầu thất bại (${res.status})`;
+    try {
+      const responseBody = (await res.json()) as { detail?: string };
+      if (responseBody.detail) detail = responseBody.detail;
+    } catch {
+      // than nien khong phai JSON, giu thong bao mac dinh
+    }
+    throw new ApiError(res.status, detail);
+  }
+  return (await res.json()) as T;
+}
+
 export const api = {
   categories(kind: CategoryKind = "POST"): Promise<Category[]> {
     return getJson(withQuery("/api/public/categories", { kind }));
@@ -136,5 +158,39 @@ export const api = {
     fd.set("website", input.website ?? "");
     if (input.file) fd.set("file", input.file);
     return postForm("/api/public/document-submissions", fd);
+  },
+
+  submitAccountRecovery(input: {
+    fullName: string;
+    email: string;
+    phone: string;
+    isNewStudent: boolean;
+    studentId: string;
+    cccdNumber: string;
+    classCode?: string;
+    unitName?: string;
+    screenshot?: File | null;
+    idCard?: File | null;
+    website?: string; // honeypot - de trong
+  }): Promise<{ caseCode: string; message: string }> {
+    const fd = new FormData();
+    fd.set("fullName", input.fullName);
+    fd.set("email", input.email);
+    fd.set("phone", input.phone);
+    fd.set("isNewStudent", String(input.isNewStudent));
+    fd.set("studentId", input.studentId);
+    fd.set("cccdNumber", input.cccdNumber);
+    if (input.classCode) fd.set("classCode", input.classCode);
+    if (input.unitName) fd.set("unitName", input.unitName);
+    fd.set("website", input.website ?? "");
+    if (input.screenshot) fd.set("screenshot", input.screenshot);
+    if (input.idCard) fd.set("idCard", input.idCard);
+    return postForm("/api/public/account-recovery", fd);
+  },
+
+  lookupAccountRecovery(
+    query: string,
+  ): Promise<{ status: "MOI" | "DA_XU_LY" | "TU_CHOI"; fullName: string; resultMessage: string | null; createdAt: string; processedAt: string | null }> {
+    return postJson("/api/public/account-recovery/lookup", { query });
   },
 };
