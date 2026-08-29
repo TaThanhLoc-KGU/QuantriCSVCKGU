@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminApi, ApiError } from "../api";
+import { useAuth } from "../AuthContext";
 import type { AccountRecoveryRequest, AccountRecoveryStatus } from "../types";
 import { formatDateTime } from "../../lib/format";
 import { Badge, Button, Card, EmptyState, ErrorBanner, LoadingState, PageHeader } from "../components/ui";
@@ -19,6 +20,7 @@ const STATUS_TONES: Record<AccountRecoveryStatus, "warn" | "accent" | "urgent"> 
 };
 
 export function AccountRecoveryPage() {
+  const { user } = useAuth();
   const [rows, setRows] = useState<AccountRecoveryRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -154,7 +156,7 @@ export function AccountRecoveryPage() {
           requestId={composing.id}
           toEmail={composing.email}
           defaultSubject={`Kết quả yêu cầu khôi phục tài khoản — ${composing.fullName}`}
-          defaultBody={defaultEmailBody(composing)}
+          defaultBody={defaultEmailBody(composing, user?.fullName ?? "Phòng Quản trị Cơ sở vật chất")}
           onClose={() => setComposing(null)}
           onSent={load}
         />
@@ -163,14 +165,18 @@ export function AccountRecoveryPage() {
   );
 }
 
-function defaultEmailBody(r: AccountRecoveryRequest): string {
+function defaultEmailBody(r: AccountRecoveryRequest, adminName: string): string {
+  const kindLabel = r.isNewStudent ? "Tân sinh viên" : "Sinh viên";
   return `Chào ${r.fullName},
 
-Phòng Quản trị Cơ sở vật chất đã xem xét yêu cầu khôi phục tài khoản của bạn (MSSV: ${r.studentId}).
+Phòng Quản trị Cơ sở vật chất đã xem xét yêu cầu khôi phục tài khoản của bạn (${kindLabel}) (MSSV: ${r.studentId}, Mã hồ sơ: ${r.caseCode}).
 
-[Nhập nội dung kết quả xử lý ở đây]
+Tài khoản của em sau khi khôi phục thì tên đăng nhập và mật khẩu là
+Tên đăng nhập: ${r.studentId}
+Mật khẩu: ${r.studentId}
 
 Trân trọng,
+${adminName}
 Phòng Quản trị Cơ sở vật chất — Trường Đại học Kiên Giang`;
 }
 
