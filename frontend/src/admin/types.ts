@@ -160,6 +160,38 @@ export interface CongVanIncomingDocument {
   coFile: boolean;
 }
 
+export interface CongVanOutgoingDocument {
+  id: string;
+  soVanBan: string;
+  ngayVanBan: string | null;
+  ngayBanHanh: string | null;
+  trichYeu: string;
+  loaiVanBan: string | null;
+  soVanBanThuoc: string | null;
+  nguoiKy: string | null;
+  donViSoanThao: string | null;
+  daKySo: boolean;
+  coFile: boolean;
+  ngayCongKhai: string | null;
+}
+
+export interface CongVanOutgoingListResponse {
+  total: number;
+  page: number;
+  pageSize: number;
+  items: CongVanOutgoingDocument[];
+}
+
+export interface CongVanCategoryItem {
+  ma: number;
+  ten: string;
+}
+
+export interface CongVanOutgoingCategories {
+  soVanBan: CongVanCategoryItem[];
+  loaiVanBan: CongVanCategoryItem[];
+}
+
 export type AccountRecoveryStatus = "MOI" | "DA_XU_LY" | "TU_CHOI";
 
 export interface AccountRecoveryRequest {

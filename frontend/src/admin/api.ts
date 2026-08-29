@@ -3,6 +3,8 @@ import type {
   AccountRecoveryStatus,
   AdminUser,
   CongVanIncomingDocument,
+  CongVanOutgoingCategories,
+  CongVanOutgoingListResponse,
   DocumentNumber,
   DocumentType,
   Kpi,
@@ -360,6 +362,13 @@ export const adminApi = {
       getJson(withQuery("/api/admin/congvan/incoming", { year })),
     createTask: (mscv: string, year: number): Promise<TaskView> =>
       postJson(withQuery(`/api/admin/congvan/incoming/${encodeURIComponent(mscv)}/create-task`, { year }), {}),
+
+    outgoing: (params: { nam?: number; maSCV?: number; maLVB?: number; q?: string; page?: number; pageSize?: number } = {}): Promise<CongVanOutgoingListResponse> =>
+      getJson(withQuery("/api/admin/congvan/outgoing", params)),
+    outgoingCategories: (): Promise<CongVanOutgoingCategories> => getJson("/api/admin/congvan/outgoing/danh-muc"),
+    outgoingCreateTask: (id: string): Promise<TaskView> =>
+      postJson(`/api/admin/congvan/outgoing/${encodeURIComponent(id)}/create-task`, {}),
+    outgoingFileUrl: (id: string): string => `/api/admin/congvan/outgoing/${encodeURIComponent(id)}/file`,
   },
 
   accountRecovery: {

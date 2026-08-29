@@ -69,6 +69,10 @@ app:
     # voi DataSource chinh (Postgres) - xem CongVanRepository.
     jdbc-url: ${CONGVAN_JDBC_URL:jdbc:sqlserver://localhost:60020;databaseName=congvan.vnkgu.edu.vn;integratedSecurity=true;trustServerCertificate=true;encrypt=false;}
     ma-dv: ${CONGVAN_MA_DV:24}
+    # API cong khai (chi doc, khong can dang nhap) cua he thong Cong van cho
+    # van ban DI da duoc van thu gan "dau cong khai" - chay tren cung server
+    # (100.110.62.27) nen dung 127.0.0.1 lam mac dinh khi be chay tren do.
+    public-api-base-url: ${CONGVAN_PUBLIC_API_URL:http://127.0.0.1:5100/api/v1/vanban-cong-khai}
 
 server:
   port: 8080
