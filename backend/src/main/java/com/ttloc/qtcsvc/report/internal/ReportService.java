@@ -3,8 +3,8 @@ package com.ttloc.qtcsvc.report.internal;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ttloc.qtcsvc.identity.CurrentUser;
-import com.ttloc.qtcsvc.report.Json;
 import com.ttloc.qtcsvc.report.Report;
+import com.ttloc.qtcsvc.shared.Json;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;

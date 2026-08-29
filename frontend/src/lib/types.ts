@@ -1,4 +1,4 @@
-export type CategoryKind = "POST" | "FORM";
+export type CategoryKind = "POST" | "FORM" | "PAGE";
 
 export interface Category {
   id: number;
@@ -81,4 +81,52 @@ export interface PageResponse<T> {
   size: number;
   totalElements: number;
   totalPages: number;
+}
+
+// ---- Trang con (site pages) ----
+
+export type PageBlockType = "RICH_TEXT" | "POST_LIST" | "DATA_TABLE" | "STAFF_LIST";
+export type DataTableColumnType = "TEXT" | "DATE" | "LINK" | "FILE";
+
+export interface DataTableColumn {
+  key: string;
+  label: string;
+  type: DataTableColumnType;
+}
+
+export interface DataTableGroup {
+  key: string;
+  name: string;
+}
+
+export interface PageTableRowView {
+  id: number;
+  groupKey: string | null;
+  sortOrder: number;
+  data: Record<string, unknown>;
+}
+
+export interface StaffMember {
+  id: number;
+  name: string;
+  position: string | null;
+  email: string | null;
+  phone: string | null;
+}
+
+export interface ResolvedPageBlock {
+  id: number;
+  type: PageBlockType;
+  title: string | null;
+  config: Record<string, unknown>;
+  rows: PageTableRowView[];
+  posts: Post[];
+  staff: StaffMember[];
+}
+
+export interface PageDetail {
+  category: Category;
+  breadcrumb: Category[];
+  children: Category[];
+  blocks: ResolvedPageBlock[];
 }

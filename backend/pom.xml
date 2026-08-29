@@ -179,13 +179,6 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<!-- Doc rieng (read-only) du lieu van ban den tu he thong Cong van (SQL Server)
-			     de doi chieu - xem congvanlink.internal.CongVanRepository. Can compile
-			     scope (khong phai runtime) vi dung thang SQLServerDataSource trong code. -->
-			<groupId>com.microsoft.sqlserver</groupId>
-			<artifactId>mssql-jdbc</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<!-- Khong con la runtime-only: dung thang org.postgresql.util.PGobject
@@ -340,11 +333,6 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
-					<!-- lib/ chua mssql-jdbc_auth-*.dll de mssql-jdbc dung Windows
-					     Integrated Authentication (xac thuc theo phien Windows dang
-					     dang nhap) khi doc du lieu tu he thong Cong van - xem
-					     congvanlink.internal.CongVanRepository. -->
-					<jvmArguments>-Djava.library.path=${project.basedir}/lib</jvmArguments>
 				</configuration>
 			</plugin>
 			<plugin>

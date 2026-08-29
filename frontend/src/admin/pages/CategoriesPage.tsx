@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { adminApi, ApiError, type CategoryRequest } from "../api";
 import type { Category, CategoryKind } from "../../lib/types";
 import { buildCategoryTree, type CategoryNode } from "../../lib/categoryTree";
@@ -89,6 +90,13 @@ export function CategoriesPage() {
         <td className="px-5 py-2.5 text-neutral-500">{node.sortOrder}</td>
         <td className="px-5 py-2.5">
           <div className="flex gap-2">
+            {node.kind === "PAGE" && (
+              <Link to={`/admin/trang/${node.id}`}>
+                <Button size="sm" variant="secondary">
+                  Nội dung
+                </Button>
+              </Link>
+            )}
             <Button size="sm" variant="secondary" onClick={() => openEdit(node)}>
               Sửa
             </Button>
@@ -106,7 +114,7 @@ export function CategoriesPage() {
     <div>
       <PageHeader
         title="Danh mục"
-        description="Quản lý danh mục tin bài và biểu mẫu."
+        description="Quản lý danh mục tin bài, biểu mẫu và trang con."
         actions={<Button onClick={openCreate}>+ Thêm danh mục</Button>}
       />
 
@@ -116,6 +124,9 @@ export function CategoriesPage() {
         </Button>
         <Button size="sm" variant={kind === "FORM" ? "primary" : "secondary"} onClick={() => setKind("FORM")}>
           Biểu mẫu
+        </Button>
+        <Button size="sm" variant={kind === "PAGE" ? "primary" : "secondary"} onClick={() => setKind("PAGE")}>
+          Trang con
         </Button>
       </div>
 
@@ -197,6 +208,9 @@ export function CategoriesPage() {
   );
 }
 
+const KIND_LABELS: Record<CategoryKind, string> = { POST: "Tin bài", FORM: "Biểu mẫu", PAGE: "Trang con" };
+const KIND_TONES: Record<CategoryKind, "brand" | "accent" | "warn"> = { POST: "brand", FORM: "accent", PAGE: "warn" };
+
 export function KindBadge({ kind }: { kind: CategoryKind }) {
-  return <Badge tone={kind === "POST" ? "brand" : "accent"}>{kind === "POST" ? "Tin bài" : "Biểu mẫu"}</Badge>;
+  return <Badge tone={KIND_TONES[kind]}>{KIND_LABELS[kind]}</Badge>;
 }

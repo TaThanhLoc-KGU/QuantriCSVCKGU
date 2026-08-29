@@ -2,7 +2,10 @@ import type {
   AccountRecoveryRequest,
   AccountRecoveryStatus,
   AdminUser,
-  CongVanIncomingDocument,
+  CongVanIncomingListResponse,
+  CongVanInternalDocument,
+  CongVanInternalDocumentDetail,
+  CongVanInternalFile,
   CongVanOutgoingCategories,
   CongVanOutgoingListResponse,
   DocumentNumber,
@@ -12,6 +15,9 @@ import type {
   Member,
   MemberRow,
   MediaFile,
+  PageBlockType,
+  PageBlockView,
+  PageTableRowView,
   Report,
   SettingView,
   TaskView,
@@ -204,6 +210,26 @@ export interface CreateUserRequest {
   authProvider: AdminUser["authProvider"];
 }
 
+export interface PageBlockRequest {
+  type: PageBlockType;
+  title?: string | null;
+  config: Record<string, unknown>;
+}
+
+export interface PageTableRowRequest {
+  groupKey?: string | null;
+  data: Record<string, unknown>;
+}
+
+export interface CongVanNoiBoSaveRequest {
+  soHieu?: string | null;
+  tieuDe: string;
+  noiDung?: string | null;
+  ngayBanHanh: string;
+  nguoiKy?: string | null;
+  trangThai?: number;
+}
+
 export interface UpdateUserRequest {
   email: string;
   fullName: string;
@@ -358,10 +384,12 @@ export const adminApi = {
   },
 
   congVan: {
-    incoming: (year: number): Promise<CongVanIncomingDocument[]> =>
-      getJson(withQuery("/api/admin/congvan/incoming", { year })),
-    createTask: (mscv: string, year: number): Promise<TaskView> =>
-      postJson(withQuery(`/api/admin/congvan/incoming/${encodeURIComponent(mscv)}/create-task`, { year }), {}),
+    incoming: (params: { year?: number; q?: string; page?: number; pageSize?: number } = {}): Promise<CongVanIncomingListResponse> =>
+      getJson(withQuery("/api/admin/congvan/incoming", params)),
+    createTask: (id: string): Promise<TaskView> =>
+      postJson(`/api/admin/congvan/incoming/${encodeURIComponent(id)}/create-task`, {}),
+    incomingFileUrl: (id: string, fileId: number): string =>
+      `/api/admin/congvan/incoming/${encodeURIComponent(id)}/files/${fileId}`,
 
     outgoing: (params: { nam?: number; maSCV?: number; maLVB?: number; q?: string; page?: number; pageSize?: number } = {}): Promise<CongVanOutgoingListResponse> =>
       getJson(withQuery("/api/admin/congvan/outgoing", params)),
@@ -369,6 +397,50 @@ export const adminApi = {
     outgoingCreateTask: (id: string): Promise<TaskView> =>
       postJson(`/api/admin/congvan/outgoing/${encodeURIComponent(id)}/create-task`, {}),
     outgoingFileUrl: (id: string): string => `/api/admin/congvan/outgoing/${encodeURIComponent(id)}/file`,
+
+    noibo: {
+      list: (params: { nam?: number; tuKhoa?: string } = {}): Promise<CongVanInternalDocument[]> =>
+        getJson(withQuery("/api/admin/congvan/noibo", params)),
+      get: (id: number): Promise<CongVanInternalDocumentDetail> => getJson(`/api/admin/congvan/noibo/${id}`),
+      create: (body: CongVanNoiBoSaveRequest): Promise<CongVanInternalDocument> => postJson("/api/admin/congvan/noibo", body),
+      update: (id: number, body: CongVanNoiBoSaveRequest): Promise<CongVanInternalDocument> => putJson(`/api/admin/congvan/noibo/${id}`, body),
+      remove: (id: number): Promise<void> => del(`/api/admin/congvan/noibo/${id}`),
+      uploadFile: async (id: number, file: File): Promise<CongVanInternalFile> => {
+        await ensureCsrfCookie();
+        const token = readCookie("XSRF-TOKEN");
+        const fd = new FormData();
+        fd.append("file", file);
+        const headers = new Headers();
+        if (token) headers.set("X-XSRF-TOKEN", token);
+        const res = await fetch(`/api/admin/congvan/noibo/${id}/files`, { method: "POST", body: fd, headers, credentials: "include" });
+        if (!res.ok) throw new ApiError(res.status, `Tải tệp thất bại (${res.status})`);
+        return res.json();
+      },
+      fileUrl: (id: number, fileId: number): string => `/api/admin/congvan/noibo/${id}/files/${fileId}`,
+      removeFile: (id: number, fileId: number): Promise<void> => del(`/api/admin/congvan/noibo/${id}/files/${fileId}`),
+    },
+  },
+
+  pages: {
+    blocks: {
+      list: (categoryId: number): Promise<PageBlockView[]> => getJson(`/api/admin/pages/${categoryId}/blocks`),
+      create: (categoryId: number, body: PageBlockRequest): Promise<PageBlockView> =>
+        postJson(`/api/admin/pages/${categoryId}/blocks`, body),
+      update: (blockId: number, body: PageBlockRequest): Promise<PageBlockView> =>
+        putJson(`/api/admin/pages/blocks/${blockId}`, body),
+      remove: (blockId: number): Promise<void> => del(`/api/admin/pages/blocks/${blockId}`),
+      move: (blockId: number, direction: "UP" | "DOWN"): Promise<PageBlockView> =>
+        patchJson(`/api/admin/pages/blocks/${blockId}/move`, { direction }),
+    },
+    rows: {
+      create: (blockId: number, body: PageTableRowRequest): Promise<PageTableRowView> =>
+        postJson(`/api/admin/pages/blocks/${blockId}/rows`, body),
+      update: (rowId: number, body: PageTableRowRequest): Promise<PageTableRowView> =>
+        putJson(`/api/admin/pages/rows/${rowId}`, body),
+      remove: (rowId: number): Promise<void> => del(`/api/admin/pages/rows/${rowId}`),
+      move: (rowId: number, direction: "UP" | "DOWN"): Promise<PageTableRowView> =>
+        patchJson(`/api/admin/pages/rows/${rowId}/move`, { direction }),
+    },
   },
 
   accountRecovery: {

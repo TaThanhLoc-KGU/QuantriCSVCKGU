@@ -2,13 +2,22 @@ import type { Category } from "./types";
 
 export interface CategoryNode extends Category {
   children: CategoryNode[];
+  href: string;
 }
 
-/** Chuyen danh sach phang (parentId) thanh cay, sap theo sortOrder. */
-export function buildCategoryTree(categories: Category[]): CategoryNode[] {
+/**
+ * Chuyen danh sach phang (parentId) thanh cay, sap theo sortOrder, kem duong
+ * dan (href) cho tung node. Mac dinh href phang "/danh-muc/:slug" (danh muc
+ * tin bai/bieu mau); trang con (kind=PAGE) truyen hrefFor rieng de sinh
+ * duong dan long theo cay - xem SiteHeader.
+ */
+export function buildCategoryTree(
+  categories: Category[],
+  hrefFor: (node: Category, ancestorSlugs: string[]) => string = (node) => `/danh-muc/${node.slug}`,
+): CategoryNode[] {
   const nodeById = new Map<number, CategoryNode>();
   for (const c of categories) {
-    nodeById.set(c.id, { ...c, children: [] });
+    nodeById.set(c.id, { ...c, children: [], href: "" });
   }
 
   const roots: CategoryNode[] = [];
@@ -26,6 +35,14 @@ export function buildCategoryTree(categories: Category[]): CategoryNode[] {
     nodes.forEach((n) => sortRecursive(n.children));
   };
   sortRecursive(roots);
+
+  const assignHrefs = (nodes: CategoryNode[], ancestorSlugs: string[]) => {
+    for (const node of nodes) {
+      node.href = hrefFor(node, ancestorSlugs);
+      assignHrefs(node.children, [...ancestorSlugs, node.slug]);
+    }
+  };
+  assignHrefs(roots, []);
 
   return roots;
 }

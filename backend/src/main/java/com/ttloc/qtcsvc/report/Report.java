@@ -1,13 +1,14 @@
 package com.ttloc.qtcsvc.report;
 
+import com.ttloc.qtcsvc.shared.Json;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
 
 /**
- * sections luu dang chuoi JSON tho, boc trong Json (xem Json.java) - anh xa
- * qua/lai cot jsonb bang custom converter (report.internal.JsonbConverters).
+ * sections luu dang chuoi JSON tho, boc trong Json (xem shared.Json) - anh xa
+ * qua/lai cot jsonb bang custom converter (shared.internal.JsonbConverters).
  */
 @Table("reports")
 public record Report(

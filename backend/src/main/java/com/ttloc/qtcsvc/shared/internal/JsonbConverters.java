@@ -1,6 +1,6 @@
-package com.ttloc.qtcsvc.report.internal;
+package com.ttloc.qtcsvc.shared.internal;
 
-import com.ttloc.qtcsvc.report.Json;
+import com.ttloc.qtcsvc.shared.Json;
 import org.postgresql.util.PGobject;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
@@ -15,13 +15,13 @@ import java.sql.SQLException;
  * converter Enum->String mac dinh va ap dung cho moi cot enum khac (da gap
  * loi nay thuc te - xem ghi chu trong Json.java).
  */
-final class JsonbConverters {
+public final class JsonbConverters {
 
     private JsonbConverters() {
     }
 
     @ReadingConverter
-    static class PgObjectToJsonConverter implements Converter<PGobject, Json> {
+    public static class PgObjectToJsonConverter implements Converter<PGobject, Json> {
         @Override
         public Json convert(PGobject source) {
             return new Json(source.getValue());
@@ -29,7 +29,7 @@ final class JsonbConverters {
     }
 
     @WritingConverter
-    static class JsonToPgObjectConverter implements Converter<Json, PGobject> {
+    public static class JsonToPgObjectConverter implements Converter<Json, PGobject> {
         @Override
         public PGobject convert(Json source) {
             PGobject pgObject = new PGobject();

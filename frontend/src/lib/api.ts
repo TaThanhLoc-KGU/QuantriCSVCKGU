@@ -4,6 +4,7 @@ import type {
   CategoryKind,
   Form,
   Notification,
+  PageDetail,
   PageResponse,
   Post,
   PublicDisclosureResponse,
@@ -138,6 +139,10 @@ export const api = {
 
   mediaUrl(id: number): string {
     return `/api/public/media/${id}`;
+  },
+
+  resolvePage(path: string): Promise<PageDetail> {
+    return getJson(withQuery("/api/public/pages/resolve", { path }));
   },
 
   submitDocument(input: {

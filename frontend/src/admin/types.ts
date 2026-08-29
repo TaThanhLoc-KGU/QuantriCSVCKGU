@@ -148,16 +148,52 @@ export interface MediaFile {
 }
 
 export interface CongVanIncomingDocument {
-  mscv: string;
-  soCV: string | null;
-  trichYeu: string;
-  ngayDen: string;
-  nguoiKy: string | null;
-  tenCoQuan: string | null;
+  id: string;
+  soVanBan: string;
+  soDen: string | null;
+  ngayDen: string | null;
   ngayBanHanh: string | null;
+  trichYeu: string;
+  coQuanBanHanh: string | null;
+  loaiVanBan: string | null;
+  nguoiKy: string | null;
+  donViXuLyChinh: string | null;
   hanXuLy: string | null;
   ngayHoanThanh: string | null;
+  trangThai: string;
+  trangThaiText: string;
   coFile: boolean;
+}
+
+export interface CongVanIncomingListResponse {
+  total: number;
+  page: number;
+  pageSize: number;
+  items: CongVanIncomingDocument[];
+}
+
+export interface CongVanInternalDocument {
+  id: number;
+  stt: number | null;
+  soHieu: string | null;
+  tieuDe: string;
+  noiDung: string | null;
+  ngayBanHanh: string;
+  nguoiKy: string | null;
+  trangThai: number;
+  trangThaiText: string;
+  ngayTao: string;
+  soFile: number | null;
+}
+
+export interface CongVanInternalFile {
+  id: number;
+  tenFile: string;
+  ngayUpload: string;
+}
+
+export interface CongVanInternalDocumentDetail extends Omit<CongVanInternalDocument, "soFile"> {
+  files: CongVanInternalFile[];
 }
 
 export interface CongVanOutgoingDocument {
@@ -215,6 +251,39 @@ export interface AccountRecoveryRequest {
   createdAt: string;
   processedAt: string | null;
   processedBy: number | null;
+}
+
+// ---- Trang con (site pages) ----
+
+export type PageBlockType = "RICH_TEXT" | "POST_LIST" | "DATA_TABLE" | "STAFF_LIST";
+export type DataTableColumnType = "TEXT" | "DATE" | "LINK" | "FILE";
+
+export interface DataTableColumn {
+  key: string;
+  label: string;
+  type: DataTableColumnType;
+}
+
+export interface DataTableGroup {
+  key: string;
+  name: string;
+}
+
+export interface PageTableRowView {
+  id: number;
+  groupKey: string | null;
+  sortOrder: number;
+  data: Record<string, unknown>;
+}
+
+export interface PageBlockView {
+  id: number;
+  categoryId: number;
+  type: PageBlockType;
+  title: string | null;
+  sortOrder: number;
+  config: Record<string, unknown>;
+  rows: PageTableRowView[];
 }
 
 export const REPORT_SECTION_LABELS: Record<string, string> = {

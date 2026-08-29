@@ -1,21 +1,28 @@
 package com.ttloc.qtcsvc.congvanlink;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
- * Van ban den tu he thong Cong van (congvan.vnkgu.edu.vn) duoc giao/phoi hop
- * cho phong xu ly - doc rieng (read-only), khong ghi nguoc lai he thong do.
+ * Van ban den ma phong duoc giao xu ly (chu tri hoac phoi hop), doc qua API
+ * theo don vi (X-Api-Key) cua he thong Cong van - xem
+ * congvanlink.internal.CongVanDenApiClient. Chi doc, khong ghi nguoc lai he
+ * thong do.
  */
 public record CongVanIncomingDocument(
-        String mscv,
-        String soCV,
+        String id,
+        String soVanBan,
+        String soDen,
+        LocalDateTime ngayDen,
+        LocalDateTime ngayBanHanh,
         String trichYeu,
-        LocalDate ngayDen,
+        String coQuanBanHanh,
+        String loaiVanBan,
         String nguoiKy,
-        String tenCoQuan,
-        LocalDate ngayBanHanh,
-        LocalDate hanXuLy,
-        LocalDate ngayHoanThanh,
+        String donViXuLyChinh,
+        LocalDateTime hanXuLy,
+        LocalDateTime ngayHoanThanh,
+        String trangThai,
+        String trangThaiText,
         boolean coFile
 ) {
 }

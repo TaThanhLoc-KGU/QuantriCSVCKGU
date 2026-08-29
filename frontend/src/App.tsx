@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { PublicLayout } from "./layouts/PublicLayout";
 import { HomePage } from "./pages/HomePage";
 import { CategoryPage } from "./pages/CategoryPage";
+import { SitePage } from "./pages/SitePage";
 import { PostDetailPage } from "./pages/PostDetailPage";
 import { FormsPage } from "./pages/FormsPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
@@ -21,6 +22,7 @@ const AdminLayout = lazy(() => import("./admin/layouts/AdminLayout").then((m) =>
 const LoginPage = lazy(() => import("./admin/pages/LoginPage").then((m) => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import("./admin/pages/DashboardPage").then((m) => ({ default: m.DashboardPage })));
 const CategoriesPage = lazy(() => import("./admin/pages/CategoriesPage").then((m) => ({ default: m.CategoriesPage })));
+const PageBuilderPage = lazy(() => import("./admin/pages/PageBuilderPage").then((m) => ({ default: m.PageBuilderPage })));
 const BannersPage = lazy(() => import("./admin/pages/BannersPage").then((m) => ({ default: m.BannersPage })));
 const NotificationsAdminPage = lazy(() =>
   import("./admin/pages/NotificationsAdminPage").then((m) => ({ default: m.NotificationsAdminPage })),
@@ -57,6 +59,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route index element={<HomePage />} />
           <Route path="danh-muc/:slug" element={<CategoryPage />} />
+          <Route path="trang/*" element={<SitePage />} />
           <Route path="tin/:slug" element={<PostDetailPage />} />
           <Route path="bieu-mau" element={<FormsPage />} />
           <Route path="thong-bao" element={<NotificationsPage />} />
@@ -88,6 +91,7 @@ function App() {
             <Route path="bai-viet/moi" element={<PostEditPage />} />
             <Route path="bai-viet/:id" element={<PostEditPage />} />
             <Route path="danh-muc" element={<CategoriesPage />} />
+            <Route path="trang/:categoryId" element={<PageBuilderPage />} />
             <Route path="banner" element={<BannersPage />} />
             <Route path="bieu-mau" element={<FormsAdminPage />} />
             <Route path="thong-bao" element={<NotificationsAdminPage />} />

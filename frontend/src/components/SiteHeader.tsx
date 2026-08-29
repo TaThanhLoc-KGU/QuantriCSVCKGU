@@ -14,7 +14,10 @@ const MOBILE_LINKS = [
 
 export function SiteHeader() {
   const { categories } = useCategories("POST");
-  const tree = buildCategoryTree(categories);
+  const { categories: pageCategories } = useCategories("PAGE");
+  const postTree = buildCategoryTree(categories);
+  const pageTree = buildCategoryTree(pageCategories, (node, ancestorSlugs) => `/trang/${[...ancestorSlugs, node.slug].join("/")}`);
+  const tree = [...postTree, ...pageTree];
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -94,9 +97,9 @@ export function SiteHeader() {
               Trang chủ
             </NavLink>
             {tree.map((node) => (
-              <div key={node.id}>
+              <div key={`${node.kind}-${node.id}`}>
                 <NavLink
-                  to={`/danh-muc/${node.slug}`}
+                  to={node.href}
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
                     `block px-4 py-2.5 text-sm font-medium ${isActive ? "text-brand-700" : "text-neutral-700"}`
@@ -109,7 +112,7 @@ export function SiteHeader() {
                     {node.children.map((child) => (
                       <NavLink
                         key={child.id}
-                        to={`/danh-muc/${child.slug}`}
+                        to={child.href}
                         onClick={() => setMobileOpen(false)}
                         className={({ isActive }) =>
                           `px-4 py-2 text-sm ${isActive ? "text-brand-700" : "text-neutral-600"}`

@@ -27,7 +27,7 @@ function CategoryNavItem({ node }: CategoryNavItemProps) {
       onMouseLeave={hasChildren ? scheduleClose : undefined}
     >
       <NavLink
-        to={`/danh-muc/${node.slug}`}
+        to={node.href}
         className={({ isActive }) =>
           `relative flex items-center gap-1 whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors hover:bg-brand-700 hover:text-white ${
             isActive ? "bg-brand-800 text-white after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-accent-400" : "text-brand-50"
@@ -53,7 +53,7 @@ function CategoryNavItem({ node }: CategoryNavItemProps) {
           {node.children.map((child) => (
             <li key={child.id}>
               <NavLink
-                to={`/danh-muc/${child.slug}`}
+                to={child.href}
                 className={({ isActive }) =>
                   `block px-4 py-2 text-sm transition-colors hover:bg-brand-50 hover:text-brand-700 ${
                     isActive ? "font-semibold text-brand-700" : "text-neutral-700"

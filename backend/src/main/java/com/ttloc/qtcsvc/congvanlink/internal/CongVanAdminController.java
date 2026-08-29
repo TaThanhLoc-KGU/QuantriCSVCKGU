@@ -1,6 +1,5 @@
 package com.ttloc.qtcsvc.congvanlink.internal;
 
-import com.ttloc.qtcsvc.congvanlink.CongVanIncomingDocument;
 import com.ttloc.qtcsvc.congvanlink.CongVanOutgoingDocument;
 import com.ttloc.qtcsvc.shared.NotFoundException;
 import com.ttloc.qtcsvc.tasks.Task;
@@ -16,49 +15,63 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.List;
-
 /**
  * Doi chieu van ban voi he thong Cong van (congvan.vnkgu.edu.vn) - chi doc,
  * moi nguoi dang nhap deu xem duoc (giong cac module noi bo khac), khong
- * phan quyen rieng.
- * - Van ban DEN duoc giao/phoi hop cho phong: doc thang qua SQL Server
- *   (CongVanRepository, can Windows Integrated Auth).
- * - Van ban DI da cong khai: doc qua API cong khai (CongVanPublicApiClient,
- *   khong can dang nhap, chay tot tren moi he dieu hanh).
+ * phan quyen rieng. Ca 2 loai deu qua HTTP API cua he thong Cong van (khong
+ * con ket noi thang SQL Server):
+ * - Van ban DEN duoc giao/phoi hop cho phong: API theo don vi (X-Api-Key).
+ * - Van ban DI da cong khai: API cong khai (khong can key).
  */
 @RestController
 @RequestMapping("/api/admin/congvan")
 class CongVanAdminController {
 
-    private final CongVanRepository repository;
+    private final CongVanDenApiClient denApiClient;
     private final CongVanPublicApiClient publicApiClient;
     private final TaskCreationService taskCreationService;
 
-    CongVanAdminController(CongVanRepository repository, CongVanPublicApiClient publicApiClient, TaskCreationService taskCreationService) {
-        this.repository = repository;
+    CongVanAdminController(CongVanDenApiClient denApiClient, CongVanPublicApiClient publicApiClient, TaskCreationService taskCreationService) {
+        this.denApiClient = denApiClient;
         this.publicApiClient = publicApiClient;
         this.taskCreationService = taskCreationService;
     }
 
     @GetMapping("/incoming")
-    List<CongVanIncomingDocument> incoming(@RequestParam(required = false) Integer year) {
-        return repository.findIncoming(year != null ? year : LocalDate.now().getYear());
+    CongVanDenApiDtos.ListResponse incoming(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        return denApiClient.list(year, q, page, pageSize);
     }
 
-    @PostMapping("/incoming/{mscv}/create-task")
-    ResponseEntity<Task> createTask(@PathVariable String mscv, @RequestParam int year) {
-        CongVanIncomingDocument doc = repository.findIncoming(year).stream()
-                .filter(d -> d.mscv().equals(mscv))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Khong tim thay van ban Cong van: " + mscv));
+    @PostMapping("/incoming/{id}/create-task")
+    ResponseEntity<Task> createTask(@PathVariable String id) {
+        CongVanDenApiDtos.Detail doc = denApiClient.detail(id);
+        if (doc == null) {
+            throw new NotFoundException("Khong tim thay van ban den: " + id);
+        }
 
-        String title = "[Công văn " + (doc.soCV() != null ? doc.soCV() : doc.mscv()) + "] " + doc.trichYeu();
+        String soHieu = doc.soDen() != null && !doc.soDen().isBlank() ? doc.soDen() : doc.soVanBan();
+        String title = "[Công văn " + soHieu + "] " + doc.trichYeu();
         String description = "Văn bản đến từ hệ thống Công văn (%s).\nCơ quan ban hành: %s\nNgười ký: %s"
-                .formatted(doc.mscv(), doc.tenCoQuan() != null ? doc.tenCoQuan() : "—", doc.nguoiKy() != null ? doc.nguoiKy() : "—");
+                .formatted(doc.id(), doc.coQuanBanHanh() != null ? doc.coQuanBanHanh() : "—", doc.nguoiKy() != null ? doc.nguoiKy() : "—");
         Task task = taskCreationService.createSystemDeptTask(title, description);
         return ResponseEntity.status(HttpStatus.CREATED).body(task);
+    }
+
+    @GetMapping("/incoming/{id}/files/{fileId}")
+    ResponseEntity<byte[]> incomingFile(@PathVariable String id, @PathVariable long fileId) {
+        String[] contentType = new String[1];
+        byte[] body = denApiClient.downloadFile(id, fileId, contentType);
+        if (body == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType[0]))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .body(body);
     }
 
     @GetMapping("/outgoing")
