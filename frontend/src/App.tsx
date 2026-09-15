@@ -11,6 +11,7 @@ import { DisclosuresPage } from "./pages/DisclosuresPage";
 import { SubmitDocumentPage } from "./pages/SubmitDocumentPage";
 import { AccountRecoveryPage } from "./pages/AccountRecoveryPage";
 import { AccountRecoveryLookupPage } from "./pages/AccountRecoveryLookupPage";
+import { StudentEmailLookupPage } from "./pages/StudentEmailLookupPage";
 import { SearchPage } from "./pages/SearchPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { AuthProvider } from "./admin/AuthContext";
@@ -43,6 +44,7 @@ const ReportsPage = lazy(() => import("./admin/pages/ReportsPage").then((m) => (
 const UsersPage = lazy(() => import("./admin/pages/UsersPage").then((m) => ({ default: m.UsersPage })));
 const MembersPage = lazy(() => import("./admin/pages/MembersPage").then((m) => ({ default: m.MembersPage })));
 const SettingsPage = lazy(() => import("./admin/pages/SettingsPage").then((m) => ({ default: m.SettingsPage })));
+const StudentEmailsPage = lazy(() => import("./admin/pages/StudentEmailsPage").then((m) => ({ default: m.StudentEmailsPage })));
 
 function AdminFallback() {
   return (
@@ -67,6 +69,7 @@ function App() {
           <Route path="gui-van-ban" element={<SubmitDocumentPage />} />
           <Route path="khoi-phuc-tai-khoan" element={<AccountRecoveryPage />} />
           <Route path="tra-cuu-ket-qua" element={<AccountRecoveryLookupPage />} />
+          <Route path="tra-cuu-email" element={<StudentEmailLookupPage />} />
           <Route path="tim-kiem" element={<SearchPage />} />
         </Route>
 
@@ -99,6 +102,7 @@ function App() {
             <Route path="loai-van-ban" element={<DocumentTypesPage />} />
             <Route path="doi-chieu-cong-van" element={<CongVanPage />} />
             <Route path="khoi-phuc-tai-khoan" element={<AccountRecoveryAdminPage />} />
+            <Route path="danh-ba-email" element={<StudentEmailsPage />} />
             <Route path="nhiem-vu" element={<TasksPage />} />
             <Route path="bao-cao" element={<ReportsPage />} />
             <Route element={<ProtectedRoute roles={["ADMIN"]} />}>

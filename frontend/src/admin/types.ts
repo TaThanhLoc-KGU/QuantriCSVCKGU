@@ -286,6 +286,34 @@ export interface PageBlockView {
   rows: PageTableRowView[];
 }
 
+// ---- Danh ba email sinh vien ----
+
+export interface StudentEmailRecordView {
+  id: number;
+  studentId: string;
+  fullName: string;
+  className: string | null;
+  major: string | null;
+  majorCode: string | null;
+  cohort: string | null;
+  email: string;
+  importedAt: string;
+}
+
+export interface StudentEmailListResponse {
+  total: number;
+  items: StudentEmailRecordView[];
+}
+
+export interface StudentEmailImportPreview {
+  validCount: number;
+  errors: string[];
+}
+
+export interface StudentEmailImportResult {
+  importedCount: number;
+}
+
 export const REPORT_SECTION_LABELS: Record<string, string> = {
   "muc1": "I. Đặc điểm tình hình",
   "muc2": "II. Công tác chỉ đạo, điều hành",

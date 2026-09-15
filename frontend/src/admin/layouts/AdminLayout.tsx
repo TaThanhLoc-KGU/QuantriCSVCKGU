@@ -40,7 +40,13 @@ function useNavGroups(): NavGroup[] {
       ],
     },
     { label: "Công việc", items: [{ to: "/admin/nhiem-vu", label: "Nhiệm vụ" }] },
-    { label: "Hỗ trợ sinh viên", items: [{ to: "/admin/khoi-phuc-tai-khoan", label: "Khôi phục tài khoản" }] },
+    {
+      label: "Hỗ trợ sinh viên",
+      items: [
+        { to: "/admin/khoi-phuc-tai-khoan", label: "Khôi phục tài khoản" },
+        { to: "/admin/danh-ba-email", label: "Danh bạ email" },
+      ],
+    },
     { label: "Báo cáo", items: [{ to: "/admin/bao-cao", label: "Báo cáo định kỳ" }] },
   ];
 

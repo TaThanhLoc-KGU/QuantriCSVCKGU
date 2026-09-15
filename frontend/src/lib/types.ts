@@ -130,3 +130,13 @@ export interface PageDetail {
   children: Category[];
   blocks: ResolvedPageBlock[];
 }
+
+// ---- Danh ba email sinh vien ----
+
+export interface StudentEmailLookupResult {
+  studentId: string;
+  fullName: string;
+  className: string | null;
+  major: string | null;
+  email: string;
+}

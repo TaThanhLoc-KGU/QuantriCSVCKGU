@@ -20,6 +20,9 @@ import type {
   PageTableRowView,
   Report,
   SettingView,
+  StudentEmailImportPreview,
+  StudentEmailImportResult,
+  StudentEmailListResponse,
   TaskView,
 } from "./types";
 import type { Banner, Category, CategoryKind, Form, Notification, Post } from "../lib/types";
@@ -440,6 +443,32 @@ export const adminApi = {
       remove: (rowId: number): Promise<void> => del(`/api/admin/pages/rows/${rowId}`),
       move: (rowId: number, direction: "UP" | "DOWN"): Promise<PageTableRowView> =>
         patchJson(`/api/admin/pages/rows/${rowId}/move`, { direction }),
+    },
+  },
+
+  studentEmails: {
+    list: (q = ""): Promise<StudentEmailListResponse> => getJson(withQuery("/api/admin/student-emails", { q })),
+    previewImport: async (file: File): Promise<StudentEmailImportPreview> => {
+      await ensureCsrfCookie();
+      const token = readCookie("XSRF-TOKEN");
+      const fd = new FormData();
+      fd.append("file", file);
+      const headers = new Headers();
+      if (token) headers.set("X-XSRF-TOKEN", token);
+      const res = await fetch("/api/admin/student-emails/import?preview=true", { method: "POST", body: fd, headers, credentials: "include" });
+      if (!res.ok) throw new ApiError(res.status, `Đọc file thất bại (${res.status})`);
+      return res.json();
+    },
+    commitImport: async (file: File): Promise<StudentEmailImportResult> => {
+      await ensureCsrfCookie();
+      const token = readCookie("XSRF-TOKEN");
+      const fd = new FormData();
+      fd.append("file", file);
+      const headers = new Headers();
+      if (token) headers.set("X-XSRF-TOKEN", token);
+      const res = await fetch("/api/admin/student-emails/import?preview=false", { method: "POST", body: fd, headers, credentials: "include" });
+      if (!res.ok) throw new ApiError(res.status, `Nhập dữ liệu thất bại (${res.status})`);
+      return res.json();
     },
   },
 

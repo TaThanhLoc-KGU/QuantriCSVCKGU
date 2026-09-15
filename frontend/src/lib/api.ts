@@ -8,6 +8,7 @@ import type {
   PageResponse,
   Post,
   PublicDisclosureResponse,
+  StudentEmailLookupResult,
 } from "./types";
 
 export class ApiError extends Error {
@@ -143,6 +144,10 @@ export const api = {
 
   resolvePage(path: string): Promise<PageDetail> {
     return getJson(withQuery("/api/public/pages/resolve", { path }));
+  },
+
+  lookupStudentEmail(studentId: string): Promise<StudentEmailLookupResult> {
+    return getJson(withQuery("/api/public/student-emails/lookup", { studentId }));
   },
 
   submitDocument(input: {

@@ -80,6 +80,7 @@ const FIXED_ITEMS = [
   { to: "/thong-bao", label: "Thông báo" },
   { to: "/cong-khai", label: "Công khai" },
   { to: "/gui-van-ban", label: "Gửi văn bản" },
+  { to: "/tra-cuu-email", label: "Tra cứu email SV" },
 ];
 
 export function CategoryNav({ categories, className }: CategoryNavProps) {
