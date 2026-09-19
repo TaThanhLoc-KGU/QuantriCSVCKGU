@@ -1,6 +1,7 @@
 import { useRef, useState, type DragEvent } from "react";
 import clsx from "clsx";
 import { adminApi, ApiError } from "../api";
+import { ImageCropper } from "./ImageCropper";
 
 interface ImageDropzoneProps {
   value: string | null;
@@ -8,13 +9,31 @@ interface ImageDropzoneProps {
   folder: string;
   hint?: string;
   aspectClassName?: string;
+  /** Neu co: sau khi chon anh se mo khung cat/chinh kich thuoc theo ti le rong/cao nay. */
+  cropAspect?: number;
+  cropOutputWidth?: number;
 }
 
-export function ImageDropzone({ value, onChange, folder, hint, aspectClassName = "aspect-[16/9]" }: ImageDropzoneProps) {
+export function ImageDropzone({ value, onChange, folder, hint, aspectClassName = "aspect-[16/9]", cropAspect, cropOutputWidth }: ImageDropzoneProps) {
+  const [pending, setPending] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function pick(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setError("Chỉ nhận tệp hình ảnh.");
+      return;
+    }
+    // SVG/GIF giu nguyen (cat se lam mat vector/hoat anh).
+    if (cropAspect && !/svg|gif/.test(file.type)) {
+      setError(null);
+      setPending(file);
+      return;
+    }
+    void upload(file);
+  }
 
   async function upload(file: File) {
     if (!file.type.startsWith("image/")) {
@@ -37,7 +56,7 @@ export function ImageDropzone({ value, onChange, folder, hint, aspectClassName =
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) void upload(file);
+    if (file) pick(file);
   }
 
   return (
@@ -97,10 +116,32 @@ export function ImageDropzone({ value, onChange, folder, hint, aspectClassName =
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={(e) => e.target.files?.[0] && void upload(e.target.files[0])}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) pick(f);
+          e.target.value = "";
+        }}
       />
 
       {error && <p className="mt-1.5 text-xs text-urgent-600">{error}</p>}
+
+      {pending && cropAspect && (
+        <ImageCropper
+          file={pending}
+          aspect={cropAspect}
+          outputWidth={cropOutputWidth}
+          onCancel={() => setPending(null)}
+          onUseOriginal={() => {
+            const f = pending;
+            setPending(null);
+            void upload(f);
+          }}
+          onConfirm={(cropped) => {
+            setPending(null);
+            void upload(cropped);
+          }}
+        />
+      )}
     </div>
   );
 }

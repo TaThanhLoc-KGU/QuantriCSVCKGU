@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
-import type { Banner, Notification, PageResponse, Post } from "../lib/types";
+import type { Banner, PageResponse, Post } from "../lib/types";
 import { useCategories } from "../lib/useCategories";
 import { useSiteInfo } from "../lib/useSiteInfo";
 import { parseLinks } from "../lib/theme";
@@ -10,7 +10,6 @@ import { GallerySection } from "../components/GallerySection";
 import { PostCard } from "../components/PostCard";
 import { Pagination } from "../components/Pagination";
 import { SectionHeading } from "../components/SectionHeading";
-import { NotificationLevelBadge } from "../components/NotificationLevelBadge";
 import { LoadingState, ErrorState, EmptyState } from "../components/states";
 
 const PAGE_SIZE = 9;
@@ -41,7 +40,7 @@ export function HomePage() {
 
   const [banners, setBanners] = useState<Banner[]>([]);
   const [featured, setFeatured] = useState<Post[]>([]);
-  const [notices, setNotices] = useState<Notification[]>([]);
+  const [recent, setRecent] = useState<Post[]>([]);
   const [latest, setLatest] = useState<PageResponse<Post> | null>(null);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -51,13 +50,12 @@ export function HomePage() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    Promise.all([api.banners(), api.featuredPosts(4), api.notifications(), api.posts({ page, size: PAGE_SIZE })])
-      .then(([bannerList, featuredList, notificationList, latestPage]) => {
+    Promise.all([api.banners(), api.featuredPosts(4), api.posts({ page: 0, size: 12 }), api.posts({ page, size: PAGE_SIZE })])
+      .then(([bannerList, featuredList, recentPage, latestPage]) => {
         if (cancelled) return;
         setBanners(bannerList);
         setFeatured(featuredList);
-        const sorted = [...notificationList].sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.effectiveDate.localeCompare(a.effectiveDate));
-        setNotices(sorted.slice(0, 6));
+        setRecent(recentPage.items);
         setLatest(latestPage);
       })
       .catch(() => {
@@ -81,53 +79,48 @@ export function HomePage() {
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-6">
-      {/* Trang đầu: hình chính + thông báo, hai khối cao bằng nhau nên không có khoảng trống */}
-      <div className="grid gap-5 lg:h-[400px] lg:grid-cols-[minmax(0,1fr)_370px]">
-        <div className="h-[240px] sm:h-[320px] lg:h-full">
+      {/* Trang đầu: banner và khung bài mới đăng cùng một chiều cao cố định */}
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="aspect-[2/1] min-w-0 overflow-hidden rounded-xl lg:aspect-auto lg:h-[420px]">
           {banners.length > 0 ? (
             <BannerCarousel banners={banners} fill />
           ) : lead ? (
-            <Link to={`/tin/${lead.slug}`} className="group relative block h-full overflow-hidden rounded-xl bg-neutral-900">
+            <Link to={`/tin/${lead.slug}`} className="group relative block h-full overflow-hidden bg-neutral-900">
               {lead.thumbnailUrl && <img src={lead.thumbnailUrl} alt="" className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105" />}
               <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-20">
                 <span className="block text-balance text-2xl font-extrabold leading-snug text-white">{lead.title}</span>
               </span>
             </Link>
           ) : (
-            <div className="flex h-full items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+            <div className="flex h-full items-center justify-center bg-brand-50 text-brand-700">
               <span className="text-2xl font-extrabold">{site.name}</span>
             </div>
           )}
         </div>
 
-        <aside className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white">
-          <div className="flex items-center justify-between border-b-2 border-brand-700 px-4">
+        <aside className="flex h-[420px] min-w-0 flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white">
+          <div className="flex flex-shrink-0 items-center justify-between border-b-2 border-brand-700 px-4">
             <h2 className="py-3 text-lg font-extrabold text-brand-800">Thông báo</h2>
-            <Link to="/thong-bao" className="text-xs font-semibold text-brand-700 hover:underline">
+            <Link to="/tin-tuc" className="text-xs font-semibold text-brand-700 hover:underline">
               Xem tất cả →
             </Link>
           </div>
-          {notices.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-neutral-500">Chưa có thông báo nào.</p>
+          {recent.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-neutral-500">Chưa có bài viết nào.</p>
           ) : (
-            <ul className="min-h-0 flex-1 divide-y divide-neutral-100 overflow-y-auto">
-              {notices.map((n) => {
-                const dm = dayMonth(n.effectiveDate);
+            <ul className="min-h-0 flex-1 divide-y divide-neutral-100 overflow-y-auto overscroll-contain">
+              {recent.map((post) => {
+                const dm = dayMonth(post.publishedAt ?? post.createdAt);
                 return (
-                  <li key={n.id}>
-                    <Link to="/thong-bao" className="flex gap-3 px-4 py-3 hover:bg-neutral-50">
-                      <span className="tnum flex w-11 flex-shrink-0 flex-col items-center justify-center rounded-md bg-brand-50 py-1 leading-none text-brand-800">
+                  <li key={post.id}>
+                    <Link to={`/tin/${post.slug}`} className="flex gap-3 px-4 py-2.5 hover:bg-neutral-50">
+                      <span className="tnum flex h-11 w-11 flex-shrink-0 flex-col items-center justify-center rounded-md bg-brand-50 leading-none text-brand-800">
                         <b className="text-lg font-extrabold">{dm.day}</b>
                         <span className="mt-0.5 text-[11px] font-semibold">{dm.month}</span>
                       </span>
                       <span className="min-w-0">
-                        <span className="line-clamp-2 text-sm font-semibold leading-snug text-neutral-900">{n.title}</span>
-                        {(n.level === "URGENT" || n.pinned) && (
-                          <span className="mt-1 flex items-center gap-2">
-                            <NotificationLevelBadge level={n.level} />
-                            {n.pinned && <span className="text-xs font-semibold text-brand-700">Ghim</span>}
-                          </span>
-                        )}
+                        <span className="line-clamp-2 break-words text-sm font-semibold leading-snug text-neutral-900">{post.title}</span>
+                        {categoryName(post.categoryId) && <span className="mt-0.5 block truncate text-xs text-brand-700">{categoryName(post.categoryId)}</span>}
                       </span>
                     </Link>
                   </li>

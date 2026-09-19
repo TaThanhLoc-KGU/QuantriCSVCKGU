@@ -125,6 +125,8 @@ export function PostEditPage() {
             onChange={(url) => setForm((f) => ({ ...f, thumbnailUrl: url }))}
             folder="posts"
             aspectClassName="aspect-[16/9] max-w-sm"
+            cropAspect={16 / 9}
+            cropOutputWidth={1280}
           />
         </Field>
 

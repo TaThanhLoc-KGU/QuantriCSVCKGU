@@ -12,6 +12,7 @@ import { SubmitDocumentPage } from "./pages/SubmitDocumentPage";
 import { AccountRecoveryPage } from "./pages/AccountRecoveryPage";
 import { AccountRecoveryLookupPage } from "./pages/AccountRecoveryLookupPage";
 import { StudentEmailLookupPage } from "./pages/StudentEmailLookupPage";
+import { AllPostsPage } from "./pages/AllPostsPage";
 import { FeedbackPage } from "./pages/FeedbackPage";
 import { ToolPage } from "./pages/ToolPage";
 import { SearchPage } from "./pages/SearchPage";
@@ -75,6 +76,7 @@ function App() {
           <Route path="gui-van-ban" element={<SubmitDocumentPage />} />
           <Route path="khoi-phuc-tai-khoan" element={<AccountRecoveryPage />} />
           <Route path="tra-cuu-ket-qua" element={<AccountRecoveryLookupPage />} />
+          <Route path="tin-tuc" element={<AllPostsPage />} />
           <Route path="cong-cu/:slug" element={<ToolPage />} />
           <Route path="hom-thu-gop-y" element={<FeedbackPage />} />
           <Route path="tra-cuu-email" element={<StudentEmailLookupPage />} />

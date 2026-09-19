@@ -105,12 +105,14 @@ export function BannersPage() {
           <Field label="Tiêu đề" required>
             <TextInput value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           </Field>
-          <Field label="Ảnh banner" required hint="Kích thước khuyến nghị 1600×500px">
+          <Field label="Ảnh banner" required hint="Ảnh được cắt theo khung 2:1 (đúng khung hiển thị ở trang chủ) — kéo và phóng to để chọn vùng đẹp nhất.">
             <ImageDropzone
               value={form.imageUrl || null}
               onChange={(url) => setForm({ ...form, imageUrl: url })}
               folder="banners"
-              aspectClassName="aspect-[16/6]"
+              aspectClassName="aspect-[2/1]"
+              cropAspect={2}
+              cropOutputWidth={1600}
             />
           </Field>
           <Field label="Liên kết khi bấm vào">
