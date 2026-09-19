@@ -1,12 +1,18 @@
 import { useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
-import type { CategoryNode } from "../lib/categoryTree";
-
-interface CategoryNavItemProps {
-  node: CategoryNode;
+import { useTools } from "../lib/useTools";
+interface NavEntry {
+  id: number | string;
+  name: string;
+  href: string;
+  children: NavEntry[];
 }
 
-function CategoryNavItem({ node }: CategoryNavItemProps) {
+const cell =
+  "relative flex items-center gap-1 whitespace-nowrap border-r border-white/15 px-3.5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/15";
+const cellActive = "bg-white/20 after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:bg-accent-400";
+
+function CategoryNavItem({ node }: { node: NavEntry }) {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<number | undefined>(undefined);
   const hasChildren = node.children.length > 0;
@@ -21,32 +27,24 @@ function CategoryNavItem({ node }: CategoryNavItemProps) {
   }
 
   return (
-    <li
-      className="relative"
-      onMouseEnter={hasChildren ? openMenu : undefined}
-      onMouseLeave={hasChildren ? scheduleClose : undefined}
-    >
+    <li className="relative" onMouseEnter={hasChildren ? openMenu : undefined} onMouseLeave={hasChildren ? scheduleClose : undefined}>
       <NavLink
         to={node.href}
-        className={({ isActive }) =>
-          `relative flex items-center gap-1 whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors hover:bg-brand-700 hover:text-white ${
-            isActive ? "bg-brand-800 text-white after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-accent-400" : "text-brand-50"
-          }`
-        }
+        className={({ isActive }) => `${cell} ${isActive ? cellActive : ""}`}
         aria-haspopup={hasChildren ? "true" : undefined}
         aria-expanded={hasChildren ? open : undefined}
         onFocus={hasChildren ? openMenu : undefined}
       >
         {node.name}
         {hasChildren && (
-          <svg aria-hidden="true" viewBox="0 0 12 12" className="h-3 w-3 fill-current">
-            <path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <svg aria-hidden="true" viewBox="0 0 12 12" className="h-3 w-3">
+            <path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </NavLink>
       {hasChildren && open && (
         <ul
-          className="absolute left-0 top-full z-30 min-w-56 border border-neutral-200 bg-white py-1 shadow-lg"
+          className="absolute left-0 top-full z-30 min-w-60 divide-y divide-neutral-200 border border-neutral-300 border-t-0 bg-white shadow-[0_8px_16px_-6px_rgba(0,0,0,0.25)]"
           onMouseEnter={openMenu}
           onMouseLeave={scheduleClose}
         >
@@ -55,8 +53,8 @@ function CategoryNavItem({ node }: CategoryNavItemProps) {
               <NavLink
                 to={child.href}
                 className={({ isActive }) =>
-                  `block px-4 py-2 text-sm transition-colors hover:bg-brand-50 hover:text-brand-700 ${
-                    isActive ? "font-semibold text-brand-700" : "text-neutral-700"
+                  `block px-4 py-2.5 text-[13px] transition-colors hover:bg-brand-50 hover:text-brand-800 ${
+                    isActive ? "bg-brand-50 font-bold text-brand-800" : "text-neutral-700"
                   }`
                 }
               >
@@ -70,33 +68,35 @@ function CategoryNavItem({ node }: CategoryNavItemProps) {
   );
 }
 
-interface CategoryNavProps {
-  categories: CategoryNode[];
-  className?: string;
-}
-
 const FIXED_ITEMS = [
   { to: "/bieu-mau", label: "Biểu mẫu" },
   { to: "/thong-bao", label: "Thông báo" },
   { to: "/cong-khai", label: "Công khai" },
-  { to: "/gui-van-ban", label: "Gửi văn bản" },
-  { to: "/tra-cuu-email", label: "Tra cứu email SV" },
-  { to: "/hom-thu-gop-y", label: "Hòm thư góp ý" },
 ];
 
-export function CategoryNav({ categories, className }: CategoryNavProps) {
+const SERVICES: NavEntry = {
+  id: "services",
+  name: "Dịch vụ",
+  href: "/gui-van-ban",
+  children: [
+    { id: "s1", name: "Gửi văn bản", href: "/gui-van-ban", children: [] },
+    { id: "s2", name: "Khôi phục tài khoản", href: "/khoi-phuc-tai-khoan", children: [] },
+    { id: "s3", name: "Tra cứu kết quả xử lý", href: "/tra-cuu-ket-qua", children: [] },
+    { id: "s4", name: "Tra cứu email sinh viên", href: "/tra-cuu-email", children: [] },
+    { id: "s5", name: "Hòm thư góp ý", href: "/hom-thu-gop-y", children: [] },
+  ],
+};
+
+export function CategoryNav({ categories, className }: { categories: NavEntry[]; className?: string }) {
+  const tools = useTools();
+  const services: NavEntry = {
+    ...SERVICES,
+    children: [...SERVICES.children, ...tools.map((t) => ({ id: `tool-${t.slug}`, name: t.name, href: `/cong-cu/${t.slug}`, children: [] }))],
+  };
   return (
-    <ul className={`flex items-stretch ${className ?? ""}`}>
+    <ul className={`flex flex-wrap items-stretch border-l border-white/15 ${className ?? ""}`}>
       <li>
-        <NavLink
-          to="/"
-          end
-          className={({ isActive }) =>
-            `relative flex items-center px-3 py-3 text-sm font-medium transition-colors hover:bg-brand-700 hover:text-white ${
-              isActive ? "bg-brand-800 text-white after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-accent-400" : "text-brand-50"
-            }`
-          }
-        >
+        <NavLink to="/" end className={({ isActive }) => `${cell} ${isActive ? cellActive : ""}`}>
           Trang chủ
         </NavLink>
       </li>
@@ -105,18 +105,12 @@ export function CategoryNav({ categories, className }: CategoryNavProps) {
       ))}
       {FIXED_ITEMS.map((item) => (
         <li key={item.to}>
-          <NavLink
-            to={item.to}
-            className={({ isActive }) =>
-              `relative flex items-center px-3 py-3 text-sm font-medium transition-colors hover:bg-brand-700 hover:text-white ${
-                isActive ? "bg-brand-800 text-white after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-accent-400" : "text-brand-50"
-              }`
-            }
-          >
+          <NavLink to={item.to} className={({ isActive }) => `${cell} ${isActive ? cellActive : ""}`}>
             {item.label}
           </NavLink>
         </li>
       ))}
+      <CategoryNavItem node={services} />
     </ul>
   );
 }

@@ -7,39 +7,34 @@ export interface HeroBreadcrumbItem {
 }
 
 interface PageHeroProps {
-  icon: ReactNode;
+  icon?: ReactNode;
   title: string;
   description?: string;
   breadcrumb: HeroBreadcrumbItem[];
   actions?: ReactNode;
 }
 
-export function PageHero({ icon, title, description, breadcrumb, actions }: PageHeroProps) {
+/** Đầu trang con: vệt đường dẫn + tiêu đề trên nền sáng, vạch dưới màu thương hiệu (không dải màu lớn chiếm chỗ). */
+export function PageHero({ title, description, breadcrumb, actions }: PageHeroProps) {
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-700">
-      <div className="blueprint-grid absolute inset-0" aria-hidden="true" />
-      <div
-        aria-hidden="true"
-        className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-accent-500/10 blur-3xl"
-      />
-
-      <div className="relative mx-auto max-w-6xl px-4 py-8 sm:py-10">
-        <nav aria-label="Breadcrumb" className="mb-4 text-sm text-brand-200">
+    <div className="border-b-2 border-brand-700 bg-white">
+      <div className="mx-auto max-w-[1200px] px-4 py-4">
+        <nav aria-label="Breadcrumb" className="text-xs text-neutral-500">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
-              <Link to="/" className="transition-colors hover:text-white">
+              <Link to="/" className="hover:text-brand-700 hover:underline">
                 Trang chủ
               </Link>
             </li>
             {breadcrumb.map((item, idx) => (
               <li key={idx} className="flex items-center gap-1.5">
-                <span aria-hidden="true" className="text-brand-400">/</span>
+                <span aria-hidden="true">/</span>
                 {item.to ? (
-                  <Link to={item.to} className="transition-colors hover:text-white">
+                  <Link to={item.to} className="hover:text-brand-700 hover:underline">
                     {item.label}
                   </Link>
                 ) : (
-                  <span className="text-white" aria-current="page">
+                  <span className="font-semibold text-neutral-800" aria-current="page">
                     {item.label}
                   </span>
                 )}
@@ -47,25 +42,14 @@ export function PageHero({ icon, title, description, breadcrumb, actions }: Page
             ))}
           </ol>
         </nav>
-
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex items-start gap-4">
-            <span
-              aria-hidden="true"
-              className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-inset ring-white/15"
-            >
-              {icon}
-            </span>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">{title}</h1>
-              {description && <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-brand-200 sm:text-base">{description}</p>}
-            </div>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-balance text-2xl font-extrabold text-brand-800 sm:text-[28px]">{title}</h1>
+            {description && <p className="mt-1 max-w-3xl text-sm leading-relaxed text-neutral-600">{description}</p>}
           </div>
           {actions && <div className="flex-shrink-0">{actions}</div>}
         </div>
       </div>
-
-      <div className="h-1 bg-gradient-to-r from-accent-500 via-accent-400 to-accent-600" aria-hidden="true" />
     </div>
   );
 }

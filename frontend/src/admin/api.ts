@@ -26,6 +26,9 @@ import type {
   StudentEmailImportResult,
   StudentEmailListResponse,
   TaskView,
+  ToolRow,
+  ToolSubmission,
+  ToolView,
 } from "./types";
 import type { Banner, Category, CategoryKind, Form, Notification, Post } from "../lib/types";
 
@@ -213,6 +216,16 @@ export interface CreateUserRequest {
   role: AdminUser["role"];
   memberId: number | null;
   authProvider: AdminUser["authProvider"];
+}
+
+export interface ToolRequest {
+  name?: string;
+  slug?: string;
+  description?: string | null;
+  kind?: "FORM" | "LOOKUP";
+  config?: Record<string, unknown>;
+  active?: boolean;
+  sortOrder?: number;
 }
 
 export interface GalleryRequest {
@@ -480,6 +493,32 @@ export const adminApi = {
       if (!res.ok) throw new ApiError(res.status, `Nhập dữ liệu thất bại (${res.status})`);
       return res.json();
     },
+  },
+
+  tools: {
+    list: (): Promise<ToolView[]> => getJson("/api/admin/tools"),
+    get: (id: number): Promise<ToolView> => getJson(`/api/admin/tools/${id}`),
+    create: (body: ToolRequest): Promise<ToolView> => postJson("/api/admin/tools", body),
+    update: (id: number, body: ToolRequest): Promise<ToolView> => putJson(`/api/admin/tools/${id}`, body),
+    remove: (id: number): Promise<void> => del(`/api/admin/tools/${id}`),
+    submissions: (id: number): Promise<ToolSubmission[]> => getJson(`/api/admin/tools/${id}/submissions`),
+    updateSubmission: (sid: number, body: { status?: string; resultMessage?: string | null }): Promise<ToolSubmission> =>
+      patchJson(`/api/admin/tools/submissions/${sid}`, body),
+    removeSubmission: (sid: number): Promise<void> => del(`/api/admin/tools/submissions/${sid}`),
+    fileUrl: (sid: number, fieldKey: string): string => `/api/admin/tools/submissions/${sid}/files/${encodeURIComponent(fieldKey)}`,
+    rows: (id: number, q = ""): Promise<ToolRow[]> => getJson(withQuery(`/api/admin/tools/${id}/rows`, { q })),
+    importRows: async (id: number, file: File, commit: boolean): Promise<{ rowCount?: number; headers?: string[]; importedCount?: number }> => {
+      await ensureCsrfCookie();
+      const token = readCookie("XSRF-TOKEN");
+      const fd = new FormData();
+      fd.append("file", file);
+      const headers = new Headers();
+      if (token) headers.set("X-XSRF-TOKEN", token);
+      const res = await fetch(`/api/admin/tools/${id}/rows/import?preview=${commit ? "false" : "true"}`, { method: "POST", body: fd, headers, credentials: "include" });
+      if (!res.ok) throw new ApiError(res.status, `Đọc file thất bại (${res.status})`);
+      return res.json();
+    },
+    setKeyColumn: (id: number, keyColumn: string): Promise<void> => putJson(`/api/admin/tools/${id}/key-column`, { keyColumn }),
   },
 
   feedback: {

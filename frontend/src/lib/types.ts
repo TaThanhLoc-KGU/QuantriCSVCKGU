@@ -141,6 +141,33 @@ export interface StudentEmailLookupResult {
   email: string;
 }
 
+// ---- Cong cu tu tao ----
+
+export type ToolFieldType = "TEXT" | "TEXTAREA" | "EMAIL" | "PHONE" | "NUMBER" | "DATE" | "SELECT" | "FILE" | "CHECKBOX";
+
+export interface ToolField {
+  key: string;
+  label: string;
+  type: ToolFieldType;
+  required: boolean;
+  hint: string;
+  options: string[];
+}
+
+export interface ToolColumn {
+  key: string;
+  label: string;
+  show: boolean;
+}
+
+export interface PublicTool {
+  slug: string;
+  name: string;
+  description: string | null;
+  kind: "FORM" | "LOOKUP";
+  config: Record<string, unknown>;
+}
+
 // ---- Thuong hieu website, thu vien, hom thu ----
 
 export interface SiteInfo {
@@ -155,6 +182,14 @@ export interface SiteInfo {
   youtube: string;
   parentUrl: string;
   description: string;
+  primaryColor: string;
+  accentColor: string;
+  radius: string;
+  headerStyle: string;
+  topLinks: string;
+  quickLinks: string;
+  footerNote: string;
+  tickerLabel: string;
 }
 
 export interface GalleryItem {

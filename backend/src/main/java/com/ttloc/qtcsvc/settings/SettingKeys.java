@@ -28,6 +28,15 @@ public final class SettingKeys {
     public static final String SITE_PARENT_URL = "site.parentUrl";
     public static final String SITE_DESCRIPTION = "site.description";
 
+    public static final String THEME_PRIMARY = "theme.primary";
+    public static final String THEME_ACCENT = "theme.accent";
+    public static final String THEME_RADIUS = "theme.radius";
+    public static final String THEME_HEADER = "theme.header";
+    public static final String SITE_TOP_LINKS = "site.topLinks";
+    public static final String SITE_QUICK_LINKS = "site.quickLinks";
+    public static final String SITE_FOOTER_NOTE = "site.footerNote";
+    public static final String SITE_TICKER_LABEL = "site.tickerLabel";
+
     public static final String SMTP_HOST = "smtp.host";
     public static final String SMTP_PORT = "smtp.port";
     public static final String SMTP_USERNAME = "smtp.username";

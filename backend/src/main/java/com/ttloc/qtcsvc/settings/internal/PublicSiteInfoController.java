@@ -40,6 +40,14 @@ class PublicSiteInfoController {
         info.put("parentUrl", settings.getOrDefault(SettingKeys.SITE_PARENT_URL, "https://vnkgu.edu.vn/"));
         info.put("description", settings.getOrDefault(SettingKeys.SITE_DESCRIPTION,
                 "Cổng thông tin Phòng Quản trị Cơ sở vật chất - Trường Đại học Kiên Giang."));
+        info.put("primaryColor", settings.getOrDefault(SettingKeys.THEME_PRIMARY, "#1d5c94"));
+        info.put("accentColor", settings.getOrDefault(SettingKeys.THEME_ACCENT, "#35804d"));
+        info.put("radius", settings.getOrDefault(SettingKeys.THEME_RADIUS, "sharp"));
+        info.put("headerStyle", settings.getOrDefault(SettingKeys.THEME_HEADER, "solid"));
+        info.put("topLinks", settings.getOrDefault(SettingKeys.SITE_TOP_LINKS, ""));
+        info.put("quickLinks", settings.getOrDefault(SettingKeys.SITE_QUICK_LINKS, ""));
+        info.put("footerNote", settings.getOrDefault(SettingKeys.SITE_FOOTER_NOTE, ""));
+        info.put("tickerLabel", settings.getOrDefault(SettingKeys.SITE_TICKER_LABEL, "Thông báo mới"));
         return info;
     }
 

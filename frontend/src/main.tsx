@@ -4,6 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App.tsx";
 
+import { applyCachedTheme } from "./lib/theme";
+
+applyCachedTheme();
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>

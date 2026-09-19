@@ -3,8 +3,10 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { ApiError } from "../api";
 import { Button, Field, TextInput } from "../components/ui";
+import { useSiteInfo } from "../../lib/useSiteInfo";
 
 export function LoginPage() {
+  const site = useSiteInfo();
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation() as { state?: { from?: string } };
@@ -36,46 +38,47 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-base font-bold text-white">
-            QT
-          </div>
-          <p className="mt-3 text-base font-semibold text-neutral-900">Phòng Quản trị Cơ sở vật chất</p>
-          <p className="text-sm text-neutral-500">Trường Đại học Kiên Giang — Trang quản trị</p>
+    <div className="grid min-h-screen bg-neutral-100 lg:grid-cols-[minmax(0,1fr)_460px]">
+      <div className="hidden flex-col justify-between bg-brand-800 p-10 text-white lg:flex">
+        <img src={site.logoUrl} alt="" className="h-16 w-16 bg-white object-contain p-1.5" />
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-brand-200">{site.subtitle}</p>
+          <h1 className="mt-2 max-w-md text-balance text-4xl font-extrabold uppercase leading-tight">{site.name}</h1>
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-brand-100">Trang quản trị nội dung, sổ văn bản, nhiệm vụ và báo cáo của đơn vị.</p>
         </div>
+        <p className="text-xs text-brand-200">© {new Date().getFullYear()} {site.name}</p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
-          <div className="space-y-4">
-            <Field label="Tên đăng nhập" htmlFor="username" required>
-              <TextInput
-                id="username"
-                autoComplete="username"
-                autoFocus
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </Field>
-            <Field label="Mật khẩu" htmlFor="password" required>
-              <TextInput
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </Field>
+      <div className="flex items-center justify-center px-6 py-10">
+        <div className="w-full max-w-sm">
+          <div className="mb-6 lg:hidden">
+            <img src={site.logoUrl} alt="" className="h-12 w-12 object-contain" />
+            <p className="mt-2 text-base font-extrabold uppercase text-brand-800">{site.name}</p>
           </div>
+          <h2 className="text-xl font-extrabold text-neutral-900">Đăng nhập quản trị</h2>
+          <p className="mb-5 mt-1 text-sm text-neutral-600">Dùng tài khoản do quản trị viên cấp.</p>
 
-          {error && <p className="mt-4 text-sm text-urgent-600">{error}</p>}
+          <form onSubmit={handleSubmit} className="border border-neutral-300 bg-white p-5">
+            <div className="space-y-4">
+              <Field label="Tên đăng nhập" htmlFor="username" required>
+                <TextInput id="username" autoComplete="username" autoFocus value={username} onChange={(e) => setUsername(e.target.value)} required />
+              </Field>
+              <Field label="Mật khẩu" htmlFor="password" required>
+                <TextInput id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              </Field>
+            </div>
 
-          <Button type="submit" disabled={submitting} className="mt-5 w-full">
-            {submitting ? "Đang đăng nhập…" : "Đăng nhập"}
-          </Button>
-        </form>
+            {error && (
+              <p role="alert" className="mt-4 text-sm font-medium text-urgent-600">
+                {error}
+              </p>
+            )}
+
+            <Button type="submit" disabled={submitting} className="mt-5 w-full">
+              {submitting ? "Đang đăng nhập…" : "Đăng nhập"}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );

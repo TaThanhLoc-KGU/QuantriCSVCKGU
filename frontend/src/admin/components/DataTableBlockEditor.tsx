@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { adminApi, ApiError } from "../api";
 import type { DataTableColumn, DataTableGroup, PageBlockView, PageTableRowView } from "../types";
 import { Button, Select, TextInput } from "./ui";
+import { ClipIcon } from "./glyphs";
 
 function randomKey(): string {
   return Math.random().toString(36).slice(2, 10);
@@ -177,7 +178,7 @@ export function DataTableBlockEditor({ block, onBlockChanged }: Props) {
       <div className="flex min-w-40 items-center gap-1.5">
         {file.url ? (
           <a href={file.url} target="_blank" rel="noopener noreferrer" className="truncate text-xs text-brand-600 hover:underline">
-            📎 {file.name}
+            <ClipIcon /> {file.name}
           </a>
         ) : (
           <span className="text-xs text-neutral-400">— chưa có tệp —</span>

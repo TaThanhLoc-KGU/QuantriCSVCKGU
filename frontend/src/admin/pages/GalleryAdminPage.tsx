@@ -5,6 +5,7 @@ import { Badge, Button, Card, EmptyState, ErrorBanner, Field, LoadingState, Page
 import { Drawer } from "../components/Drawer";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { ImageDropzone } from "../components/ImageDropzone";
+import { PlayIcon } from "../components/glyphs";
 
 type Form = { type: "IMAGE" | "VIDEO"; title: string; url: string; sortOrder: number; active: boolean };
 const emptyForm: Form = { type: "IMAGE", title: "", url: "", sortOrder: 0, active: true };
@@ -88,7 +89,7 @@ export function GalleryAdminPage() {
             {item.type === "IMAGE" ? (
               <img src={item.url} alt="" className="aspect-video w-full object-cover" />
             ) : (
-              <div className="flex aspect-video items-center justify-center bg-neutral-900 text-3xl text-white">▶</div>
+              <div className="flex aspect-video items-center justify-center bg-neutral-900 text-white"><PlayIcon /></div>
             )}
             <div className="p-3">
               <div className="mb-1 flex items-center gap-1.5">

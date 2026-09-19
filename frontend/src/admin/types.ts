@@ -327,6 +327,35 @@ export interface FeedbackMessage {
   processedAt: string | null;
 }
 
+export interface ToolView {
+  id: number;
+  slug: string;
+  name: string;
+  description: string | null;
+  kind: "FORM" | "LOOKUP";
+  config: Record<string, unknown>;
+  active: boolean;
+  sortOrder: number;
+  pending: number;
+  rowCount: number;
+}
+
+export interface ToolSubmission {
+  id: number;
+  code: string;
+  data: Record<string, unknown>;
+  status: "MOI" | "DA_XU_LY" | "TU_CHOI";
+  resultMessage: string | null;
+  createdAt: string;
+  processedAt: string | null;
+}
+
+export interface ToolRow {
+  id: number;
+  keyValue: string;
+  data: Record<string, unknown>;
+}
+
 export const REPORT_SECTION_LABELS: Record<string, string> = {
   "muc1": "I. Đặc điểm tình hình",
   "muc2": "II. Công tác chỉ đạo, điều hành",

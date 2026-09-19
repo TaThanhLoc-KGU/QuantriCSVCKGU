@@ -3,11 +3,12 @@ import type { Banner } from "../lib/types";
 
 interface BannerCarouselProps {
   banners: Banner[];
+  fill?: boolean;
 }
 
 const AUTO_ADVANCE_MS = 6000;
 
-export function BannerCarousel({ banners }: BannerCarouselProps) {
+export function BannerCarousel({ banners, fill }: BannerCarouselProps) {
   const [index, setIndex] = useState(0);
   const timerRef = useRef<number | undefined>(undefined);
   const prefersReducedMotion = useRef(
@@ -32,7 +33,7 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
   const current = banners[index];
 
   const slide = (
-    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-neutral-200 shadow-lg sm:aspect-[3/1]">
+    <div className={`relative w-full overflow-hidden rounded-xl bg-neutral-200 ${fill ? "h-full" : "aspect-[16/9] sm:aspect-[3/1]"}`}>
       <img
         key={current.id}
         src={current.imageUrl}
@@ -55,9 +56,9 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
   );
 
   return (
-    <div className="group relative" role="region" aria-roledescription="carousel" aria-label="Banner giới thiệu">
+    <div className={`group relative ${fill ? "h-full" : ""}`} role="region" aria-roledescription="carousel" aria-label="Banner giới thiệu">
       {current.linkUrl ? (
-        <a href={current.linkUrl} className="block" target="_blank" rel="noopener noreferrer">
+        <a href={current.linkUrl} className="block h-full" target="_blank" rel="noopener noreferrer">
           {slide}
         </a>
       ) : (

@@ -9,6 +9,7 @@ import type {
   PageResponse,
   Post,
   PublicDisclosureResponse,
+  PublicTool,
   SiteInfo,
   StudentEmailLookupResult,
 } from "./types";
@@ -169,6 +170,38 @@ export const api = {
 
   pingStats(visitorId: string, newVisit: boolean): Promise<{ total: number; online: number }> {
     return postJson("/api/public/stats/ping", { visitorId, newVisit });
+  },
+
+  tools(): Promise<PublicTool[]> {
+    return getJson("/api/public/tools");
+  },
+
+  tool(slug: string): Promise<PublicTool> {
+    return getJson(`/api/public/tools/${encodeURIComponent(slug)}`);
+  },
+
+  submitTool(
+    slug: string,
+    values: Record<string, string>,
+    files: Record<string, File>,
+    website = "",
+  ): Promise<{ code: string; message: string; trackable: string }> {
+    const fd = new FormData();
+    fd.set("data", JSON.stringify(values));
+    fd.set("website", website);
+    for (const [k, f] of Object.entries(files)) fd.set(k, f);
+    return postForm(`/api/public/tools/${encodeURIComponent(slug)}/submit`, fd);
+  },
+
+  toolStatus(
+    slug: string,
+    query: string,
+  ): Promise<{ status: "MOI" | "DA_XU_LY" | "TU_CHOI"; resultMessage: string | null; createdAt: string; processedAt: string | null }> {
+    return postJson(`/api/public/tools/${encodeURIComponent(slug)}/status`, { query });
+  },
+
+  toolLookup(slug: string, query: string): Promise<{ label: string; value: string }[]> {
+    return postJson(`/api/public/tools/${encodeURIComponent(slug)}/lookup`, { query });
   },
 
   lookupStudentEmail(studentId: string): Promise<StudentEmailLookupResult> {

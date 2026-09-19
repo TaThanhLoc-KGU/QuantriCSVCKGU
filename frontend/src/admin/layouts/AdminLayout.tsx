@@ -1,7 +1,9 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import clsx from "clsx";
 import { useAuth } from "../AuthContext";
 import { NotificationBell } from "../components/NotificationBell";
+import { useSiteInfo } from "../../lib/useSiteInfo";
 
 interface NavItem {
   to: string;
@@ -25,9 +27,10 @@ function useNavGroups(): NavGroup[] {
       label: "Nội dung",
       items: [
         { to: "/admin/bai-viet", label: "Bài viết" },
-        ...(isEditorOrAdmin ? [{ to: "/admin/danh-muc", label: "Danh mục" }] : []),
+        ...(isEditorOrAdmin ? [{ to: "/admin/danh-muc", label: "Danh mục & trang con" }] : []),
         ...(isEditorOrAdmin ? [{ to: "/admin/banner", label: "Banner" }] : []),
         ...(isEditorOrAdmin ? [{ to: "/admin/thu-vien", label: "Thư viện ảnh/video" }] : []),
+        ...(isEditorOrAdmin ? [{ to: "/admin/cong-cu", label: "Chức năng tự tạo" }] : []),
         { to: "/admin/bieu-mau", label: "Biểu mẫu" },
         { to: "/admin/thong-bao", label: "Thông báo" },
       ],
@@ -58,7 +61,7 @@ function useNavGroups(): NavGroup[] {
       items: [
         { to: "/admin/nguoi-dung", label: "Người dùng" },
         { to: "/admin/nhan-su", label: "Nhân sự" },
-        { to: "/admin/cau-hinh", label: "Cấu hình" },
+        { to: "/admin/cau-hinh", label: "Giao diện & cấu hình" },
       ],
     });
   }
@@ -68,73 +71,99 @@ function useNavGroups(): NavGroup[] {
 
 const roleLabels: Record<string, string> = { ADMIN: "Quản trị viên", EDITOR: "Biên tập viên", STAFF: "Nhân viên" };
 
-export function AdminLayout() {
-  const { user, logout } = useAuth();
+function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const groups = useNavGroups();
+  const site = useSiteInfo();
 
   return (
-    <div className="flex min-h-screen bg-neutral-50">
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-neutral-200 bg-white md:flex">
-        <div className="flex items-center gap-2 border-b border-neutral-200 px-4 py-4">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white">
-            QT
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-neutral-900">Quản trị QTCSVC</p>
-            <p className="truncate text-xs text-neutral-500">Trường Đại học Kiên Giang</p>
-          </div>
+    <div className="flex h-full flex-col bg-neutral-900 text-neutral-300">
+      <div className="flex items-center gap-2.5 border-b border-neutral-700 px-4 py-3.5">
+        <img src={site.logoUrl} alt="" className="h-9 w-9 flex-shrink-0 bg-white object-contain p-0.5" />
+        <div className="min-w-0 leading-tight">
+          <p className="truncate text-[13px] font-extrabold uppercase text-white">{site.name}</p>
+          <p className="truncate text-[11px] text-neutral-400">Trang quản trị</p>
         </div>
+      </div>
 
-        <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
-          {groups.map((group) => (
-            <div key={group.label || "root"}>
-              {group.label && (
-                <p className="mb-1.5 px-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">{group.label}</p>
-              )}
-              <div className="space-y-0.5">
-                {group.items.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.end}
-                    className={({ isActive }) =>
-                      clsx(
-                        "block rounded-md px-2.5 py-2 text-sm font-medium transition-colors",
-                        isActive ? "bg-brand-50 text-brand-700" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
-                      )
-                    }
-                  >
-                    {item.label}
-                  </NavLink>
-                ))}
-              </div>
-            </div>
-          ))}
-        </nav>
+      <nav className="flex-1 overflow-y-auto py-2">
+        {groups.map((group) => (
+          <div key={group.label || "root"} className="mb-1">
+            {group.label && <p className="px-4 pb-1 pt-3 text-[11px] font-bold uppercase tracking-[0.08em] text-neutral-500">{group.label}</p>}
+            {group.items.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  clsx(
+                    "block border-l-[3px] px-4 py-1.5 text-[13px] font-medium transition-colors",
+                    isActive ? "border-accent-400 bg-white/10 text-white" : "border-transparent hover:bg-white/5 hover:text-white",
+                  )
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        ))}
+      </nav>
+
+      <a href="/" className="border-t border-neutral-700 px-4 py-3 text-xs font-semibold text-neutral-400 hover:text-white">
+        ← Xem trang công khai
+      </a>
+    </div>
+  );
+}
+
+export function AdminLayout() {
+  const { user, logout } = useAuth();
+  const [drawer, setDrawer] = useState(false);
+  useLocation();
+
+  return (
+    <div className="admin-shell flex min-h-screen bg-neutral-100">
+      <aside className="sticky top-0 hidden h-screen w-60 flex-shrink-0 md:block">
+        <Sidebar />
       </aside>
 
+      {drawer && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button aria-label="Đóng menu" className="absolute inset-0 bg-black/50" onClick={() => setDrawer(false)} />
+          <div className="absolute inset-y-0 left-0 w-64">
+            <Sidebar onNavigate={() => setDrawer(false)} />
+          </div>
+        </div>
+      )}
+
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-3 md:px-6">
-          <a href="/" className="text-xs font-medium text-brand-600 hover:underline">
-            ← Về trang công khai
-          </a>
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-neutral-300 bg-white px-4 py-2 md:px-6">
+          <button
+            onClick={() => setDrawer(true)}
+            aria-label="Mở menu"
+            className="flex h-9 w-9 items-center justify-center border border-neutral-300 text-neutral-700 md:hidden"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+            </svg>
+          </button>
+          <div className="ml-auto flex items-center gap-3">
             <NotificationBell />
-            <div className="h-6 w-px bg-neutral-200" />
-            <div className="text-right">
-              <p className="text-sm font-medium text-neutral-900">{user?.fullName}</p>
-              <p className="text-xs text-neutral-500">{user ? roleLabels[user.role] : ""}</p>
+            <div className="h-6 w-px bg-neutral-300" />
+            <div className="text-right leading-tight">
+              <p className="text-[13px] font-bold text-neutral-900">{user?.fullName}</p>
+              <p className="text-[11px] text-neutral-500">{user ? roleLabels[user.role] : ""}</p>
             </div>
             <button
               onClick={() => void logout()}
-              className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100"
+              className="border border-neutral-300 px-2.5 py-1 text-xs font-semibold text-neutral-700 hover:border-neutral-500 hover:bg-neutral-50"
             >
               Đăng xuất
             </button>
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 md:px-6">
+        <main className="flex-1 px-4 py-5 md:px-6">
           <Outlet />
         </main>
       </div>

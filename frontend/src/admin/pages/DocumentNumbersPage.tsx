@@ -8,6 +8,7 @@ import { Drawer } from "../components/Drawer";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { AttachmentPreviewModal } from "../components/AttachmentPreviewModal";
 import clsx from "clsx";
+import { ClipIcon } from "../components/glyphs";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR - i);
@@ -337,7 +338,7 @@ export function DocumentNumbersPage() {
                                 onClick={() => setPreviewing({ id: dn.id, filename: dn.attachmentName ?? "Tệp đính kèm" })}
                                 className="font-medium text-brand-600 hover:underline"
                               >
-                                📎 {dn.attachmentName ?? "Xem tệp đính kèm"}
+                                <ClipIcon /> {dn.attachmentName ?? "Xem tệp đính kèm"}
                               </button>
                             )}
                             {dn.taskId && (

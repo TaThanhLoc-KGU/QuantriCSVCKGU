@@ -5,6 +5,7 @@ import { formatDate } from "../../lib/format";
 import { Badge, Button, Card, EmptyState, ErrorBanner, Field, LoadingState, PageHeader, Select, Textarea, TextInput } from "../components/ui";
 import { Drawer } from "../components/Drawer";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { ClipIcon, SignedIcon } from "../components/glyphs";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR - i);
@@ -156,7 +157,7 @@ function IncomingTab() {
                   <tr key={doc.id} className="border-b border-neutral-100 last:border-0">
                     <td className="px-4 py-2.5 font-mono text-xs text-neutral-700">
                       {soHieu}
-                      {doc.coFile && <span className="ml-1" title="Có tệp đính kèm">📎</span>}
+                      {doc.coFile && <span className="ml-1" title="Có tệp đính kèm"><ClipIcon /></span>}
                     </td>
                     <td className="px-4 py-2.5 max-w-md text-neutral-900">{doc.trichYeu}</td>
                     <td className="px-4 py-2.5 text-neutral-500">{doc.coQuanBanHanh ?? "—"}</td>
@@ -317,14 +318,14 @@ function OutgoingTab() {
                           className="text-brand-600 hover:underline"
                           title="Xem tệp"
                         >
-                          {doc.soVanBan} 📎
+                          {doc.soVanBan} <ClipIcon />
                         </a>
                       ) : (
                         doc.soVanBan
                       )}
                       {doc.daKySo && (
                         <span className="ml-1" title="Đã ký số">
-                          ✅
+                          <SignedIcon />
                         </span>
                       )}
                     </td>
@@ -527,7 +528,7 @@ function NoiBoTab() {
                 <tr key={doc.id} className="border-b border-neutral-100 last:border-0">
                   <td className="px-4 py-2.5 font-mono text-xs text-neutral-700">
                     {doc.soHieu || "—"}
-                    {!!doc.soFile && <span className="ml-1" title={`${doc.soFile} tệp đính kèm`}>📎</span>}
+                    {!!doc.soFile && <span className="ml-1" title={`${doc.soFile} tệp đính kèm`}><ClipIcon /></span>}
                   </td>
                   <td className="px-4 py-2.5 max-w-md text-neutral-900">{doc.tieuDe}</td>
                   <td className="px-4 py-2.5 text-neutral-500">{doc.nguoiKy ?? "—"}</td>
@@ -590,7 +591,7 @@ function NoiBoTab() {
                       rel="noopener noreferrer"
                       className="truncate text-brand-600 hover:underline"
                     >
-                      📎 {f.tenFile}
+                      <ClipIcon /> {f.tenFile}
                     </a>
                     <button onClick={() => handleRemoveFile(f.id)} className="ml-2 shrink-0 text-xs text-urgent-600 hover:underline">
                       Xoá

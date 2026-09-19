@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import type { SiteInfo } from "./types";
+import { applyTheme } from "./theme";
 
 const DEFAULTS: SiteInfo = {
   name: "Phòng Quản trị Cơ sở vật chất",
@@ -14,6 +15,14 @@ const DEFAULTS: SiteInfo = {
   youtube: "",
   parentUrl: "https://vnkgu.edu.vn/",
   description: "",
+  primaryColor: "#1d5c94",
+  accentColor: "#35804d",
+  radius: "sharp",
+  headerStyle: "solid",
+  topLinks: "",
+  quickLinks: "",
+  footerNote: "",
+  tickerLabel: "Thông báo mới",
 };
 
 let cache: SiteInfo | null = null;
@@ -23,7 +32,10 @@ function load(): Promise<SiteInfo> {
   if (cache) return Promise.resolve(cache);
   pending ??= api
     .siteInfo()
-    .then((info) => (cache = info))
+    .then((info) => {
+      applyTheme(info);
+      return (cache = info);
+    })
     .catch(() => (cache = DEFAULTS));
   return pending;
 }
