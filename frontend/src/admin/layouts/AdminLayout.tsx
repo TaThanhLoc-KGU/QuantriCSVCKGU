@@ -27,6 +27,7 @@ function useNavGroups(): NavGroup[] {
         { to: "/admin/bai-viet", label: "Bài viết" },
         ...(isEditorOrAdmin ? [{ to: "/admin/danh-muc", label: "Danh mục" }] : []),
         ...(isEditorOrAdmin ? [{ to: "/admin/banner", label: "Banner" }] : []),
+        ...(isEditorOrAdmin ? [{ to: "/admin/thu-vien", label: "Thư viện ảnh/video" }] : []),
         { to: "/admin/bieu-mau", label: "Biểu mẫu" },
         { to: "/admin/thong-bao", label: "Thông báo" },
       ],
@@ -45,6 +46,7 @@ function useNavGroups(): NavGroup[] {
       items: [
         { to: "/admin/khoi-phuc-tai-khoan", label: "Khôi phục tài khoản" },
         { to: "/admin/danh-ba-email", label: "Danh bạ email" },
+        { to: "/admin/gop-y", label: "Hòm thư góp ý" },
       ],
     },
     { label: "Báo cáo", items: [{ to: "/admin/bao-cao", label: "Báo cáo định kỳ" }] },

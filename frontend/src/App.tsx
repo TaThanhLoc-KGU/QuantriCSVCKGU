@@ -12,6 +12,7 @@ import { SubmitDocumentPage } from "./pages/SubmitDocumentPage";
 import { AccountRecoveryPage } from "./pages/AccountRecoveryPage";
 import { AccountRecoveryLookupPage } from "./pages/AccountRecoveryLookupPage";
 import { StudentEmailLookupPage } from "./pages/StudentEmailLookupPage";
+import { FeedbackPage } from "./pages/FeedbackPage";
 import { SearchPage } from "./pages/SearchPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { AuthProvider } from "./admin/AuthContext";
@@ -44,6 +45,8 @@ const ReportsPage = lazy(() => import("./admin/pages/ReportsPage").then((m) => (
 const UsersPage = lazy(() => import("./admin/pages/UsersPage").then((m) => ({ default: m.UsersPage })));
 const MembersPage = lazy(() => import("./admin/pages/MembersPage").then((m) => ({ default: m.MembersPage })));
 const SettingsPage = lazy(() => import("./admin/pages/SettingsPage").then((m) => ({ default: m.SettingsPage })));
+const FeedbackAdminPage = lazy(() => import("./admin/pages/FeedbackAdminPage").then((m) => ({ default: m.FeedbackAdminPage })));
+const GalleryAdminPage = lazy(() => import("./admin/pages/GalleryAdminPage").then((m) => ({ default: m.GalleryAdminPage })));
 const StudentEmailsPage = lazy(() => import("./admin/pages/StudentEmailsPage").then((m) => ({ default: m.StudentEmailsPage })));
 
 function AdminFallback() {
@@ -69,6 +72,7 @@ function App() {
           <Route path="gui-van-ban" element={<SubmitDocumentPage />} />
           <Route path="khoi-phuc-tai-khoan" element={<AccountRecoveryPage />} />
           <Route path="tra-cuu-ket-qua" element={<AccountRecoveryLookupPage />} />
+          <Route path="hom-thu-gop-y" element={<FeedbackPage />} />
           <Route path="tra-cuu-email" element={<StudentEmailLookupPage />} />
           <Route path="tim-kiem" element={<SearchPage />} />
         </Route>
@@ -102,6 +106,8 @@ function App() {
             <Route path="loai-van-ban" element={<DocumentTypesPage />} />
             <Route path="doi-chieu-cong-van" element={<CongVanPage />} />
             <Route path="khoi-phuc-tai-khoan" element={<AccountRecoveryAdminPage />} />
+            <Route path="gop-y" element={<FeedbackAdminPage />} />
+            <Route path="thu-vien" element={<GalleryAdminPage />} />
             <Route path="danh-ba-email" element={<StudentEmailsPage />} />
             <Route path="nhiem-vu" element={<TasksPage />} />
             <Route path="bao-cao" element={<ReportsPage />} />

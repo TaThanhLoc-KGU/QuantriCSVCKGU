@@ -4,6 +4,7 @@ import { useCategories } from "../lib/useCategories";
 import { buildCategoryTree } from "../lib/categoryTree";
 import { CategoryNav } from "./CategoryNav";
 import { SearchBox } from "./SearchBox";
+import { useSiteInfo } from "../lib/useSiteInfo";
 
 const MOBILE_LINKS = [
   { to: "/bieu-mau", label: "Biểu mẫu" },
@@ -11,9 +12,11 @@ const MOBILE_LINKS = [
   { to: "/cong-khai", label: "Công khai" },
   { to: "/gui-van-ban", label: "Gửi văn bản" },
   { to: "/tra-cuu-email", label: "Tra cứu email SV" },
+  { to: "/hom-thu-gop-y", label: "Hòm thư góp ý" },
 ];
 
 export function SiteHeader() {
+  const site = useSiteInfo();
   const { categories } = useCategories("POST");
   const { categories: pageCategories } = useCategories("PAGE");
   const postTree = buildCategoryTree(categories);
@@ -25,10 +28,12 @@ export function SiteHeader() {
     <header>
       <div className="bg-brand-900 text-brand-100">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-1.5 text-xs">
-          <span>Trường Đại học Kiên Giang</span>
-          <a href="mailto:pqtcsvc@vnkgu.edu.vn" className="hover:text-white hover:underline">
-            pqtcsvc@vnkgu.edu.vn
-          </a>
+          <span>{site.subtitle}</span>
+          {site.email && (
+            <a href={`mailto:${site.email}`} className="hover:text-white hover:underline">
+              {site.email}
+            </a>
+          )}
         </div>
       </div>
 
@@ -36,16 +41,16 @@ export function SiteHeader() {
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
           <Link to="/" className="group flex items-center gap-3">
             <img
-                src="/logo.ico"
-                alt="Logo"
+                src={site.logoUrl}
+                alt=""
                 className="h-11 w-11 p-1.5 flex-shrink-0 rounded-full bg-white shadow-sm transition-transform group-hover:scale-105 object-contain"
             />
             <span className="leading-tight">
               <span className="block text-base font-bold text-neutral-900 sm:text-lg">
-                Phòng Quản trị Cơ sở vật chất
+                {site.name}
               </span>
               <span className="block text-xs text-neutral-500 sm:text-sm">
-                Trường Đại học Kiên Giang
+                {site.subtitle}
               </span>
             </span>
           </Link>

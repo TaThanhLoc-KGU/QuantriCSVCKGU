@@ -6,6 +6,17 @@ import { Badge, Button, Card, ErrorBanner, Field, LoadingState, PageHeader, Sele
 const SENSITIVE_KEYS = new Set(["ai.apiKey", "smtp.password"]);
 
 const FIELD_META: Record<string, { label: string; hint?: string; group: string }> = {
+  "site.name": { label: "Tên website / đơn vị", hint: "Hiện ở đầu trang và chân trang. Đổi để dùng cho đơn vị khác.", group: "Thương hiệu website" },
+  "site.subtitle": { label: "Dòng phụ (tên trường)", group: "Thương hiệu website" },
+  "site.logoUrl": { label: "Đường dẫn logo", hint: "Ví dụ: /logo.ico hoặc URL ảnh đã tải lên", group: "Thương hiệu website" },
+  "site.description": { label: "Mô tả ngắn", group: "Thương hiệu website" },
+  "site.address": { label: "Địa chỉ 1", group: "Thương hiệu website" },
+  "site.address2": { label: "Địa chỉ 2", group: "Thương hiệu website" },
+  "site.phone": { label: "Điện thoại", group: "Thương hiệu website" },
+  "site.email": { label: "Email liên hệ", group: "Thương hiệu website" },
+  "site.facebook": { label: "Link Facebook", group: "Thương hiệu website" },
+  "site.youtube": { label: "Link YouTube", group: "Thương hiệu website" },
+  "site.parentUrl": { label: "Link website Trường", group: "Thương hiệu website" },
   "org.name": { label: "Tên trường", group: "Thông tin đơn vị" },
   "org.dept": { label: "Tên phòng/ban", group: "Thông tin đơn vị" },
   "sso.allowedDomains": { label: "Tên miền SSO được phép", hint: "Ví dụ: vnkgu.edu.vn (phân cách bằng dấu phẩy nếu nhiều)", group: "Đăng nhập" },
@@ -21,7 +32,7 @@ const FIELD_META: Record<string, { label: string; hint?: string; group: string }
   "smtp.useSsl": { label: "Dùng TLS/SSL", hint: "true hoặc false", group: "Email" },
 };
 
-const GROUP_ORDER = ["Thông tin đơn vị", "Đăng nhập", "Trợ lý AI", "Email"];
+const GROUP_ORDER = ["Thương hiệu website", "Thông tin đơn vị", "Đăng nhập", "Trợ lý AI", "Email"];
 
 export function SettingsPage() {
   const [settings, setSettings] = useState<SettingView[]>([]);

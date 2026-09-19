@@ -1,3 +1,4 @@
+import type { GalleryItem } from "../lib/types";
 import type {
   AccountRecoveryRequest,
   AccountRecoveryStatus,
@@ -9,6 +10,7 @@ import type {
   CongVanOutgoingCategories,
   CongVanOutgoingListResponse,
   DocumentNumber,
+  FeedbackMessage,
   DocumentType,
   Kpi,
   MeResponse,
@@ -211,6 +213,14 @@ export interface CreateUserRequest {
   role: AdminUser["role"];
   memberId: number | null;
   authProvider: AdminUser["authProvider"];
+}
+
+export interface GalleryRequest {
+  type: "IMAGE" | "VIDEO";
+  title?: string | null;
+  url: string;
+  sortOrder?: number;
+  active?: boolean;
 }
 
 export interface PageBlockRequest {
@@ -470,6 +480,20 @@ export const adminApi = {
       if (!res.ok) throw new ApiError(res.status, `Nhập dữ liệu thất bại (${res.status})`);
       return res.json();
     },
+  },
+
+  feedback: {
+    list: (): Promise<FeedbackMessage[]> => getJson("/api/admin/feedback"),
+    setStatus: (id: number, status: FeedbackMessage["status"]): Promise<FeedbackMessage> =>
+      patchJson(`/api/admin/feedback/${id}/status`, { status }),
+    remove: (id: number): Promise<void> => del(`/api/admin/feedback/${id}`),
+  },
+
+  gallery: {
+    list: (): Promise<GalleryItem[]> => getJson("/api/admin/gallery"),
+    create: (body: GalleryRequest): Promise<GalleryItem> => postJson("/api/admin/gallery", body),
+    update: (id: number, body: GalleryRequest): Promise<GalleryItem> => putJson(`/api/admin/gallery/${id}`, body),
+    remove: (id: number): Promise<void> => del(`/api/admin/gallery/${id}`),
   },
 
   accountRecovery: {

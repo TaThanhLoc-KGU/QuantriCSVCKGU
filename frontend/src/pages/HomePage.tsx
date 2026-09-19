@@ -4,6 +4,7 @@ import { api } from "../lib/api";
 import type { Banner, Notification, PageResponse, Post } from "../lib/types";
 import { useCategories } from "../lib/useCategories";
 import { BannerCarousel } from "../components/BannerCarousel";
+import { GallerySection } from "../components/GallerySection";
 import { PostCard } from "../components/PostCard";
 import { Pagination } from "../components/Pagination";
 import { SectionHeading } from "../components/SectionHeading";
@@ -154,6 +155,8 @@ export function HomePage() {
           </div>
         </aside>
       </div>
+
+      <GallerySection />
     </div>
   );
 }

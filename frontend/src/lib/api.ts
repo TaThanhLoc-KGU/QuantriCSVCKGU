@@ -3,11 +3,13 @@ import type {
   Category,
   CategoryKind,
   Form,
+  GalleryItem,
   Notification,
   PageDetail,
   PageResponse,
   Post,
   PublicDisclosureResponse,
+  SiteInfo,
   StudentEmailLookupResult,
 } from "./types";
 
@@ -144,6 +146,29 @@ export const api = {
 
   resolvePage(path: string): Promise<PageDetail> {
     return getJson(withQuery("/api/public/pages/resolve", { path }));
+  },
+
+  siteInfo(): Promise<SiteInfo> {
+    return getJson("/api/public/site-info");
+  },
+
+  gallery(): Promise<GalleryItem[]> {
+    return getJson("/api/public/gallery");
+  },
+
+  submitFeedback(input: {
+    fullName: string;
+    email?: string;
+    phone?: string;
+    subject: string;
+    content: string;
+    website?: string; // honeypot - de trong
+  }): Promise<{ message: string }> {
+    return postJson("/api/public/feedback", { ...input, website: input.website ?? "" });
+  },
+
+  pingStats(visitorId: string, newVisit: boolean): Promise<{ total: number; online: number }> {
+    return postJson("/api/public/stats/ping", { visitorId, newVisit });
   },
 
   lookupStudentEmail(studentId: string): Promise<StudentEmailLookupResult> {

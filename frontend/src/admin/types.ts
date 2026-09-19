@@ -314,6 +314,19 @@ export interface StudentEmailImportResult {
   importedCount: number;
 }
 
+export interface FeedbackMessage {
+  id: number;
+  fullName: string;
+  email: string | null;
+  phone: string | null;
+  subject: string;
+  content: string;
+  status: "MOI" | "DA_XU_LY";
+  adminNote: string | null;
+  createdAt: string;
+  processedAt: string | null;
+}
+
 export const REPORT_SECTION_LABELS: Record<string, string> = {
   "muc1": "I. Đặc điểm tình hình",
   "muc2": "II. Công tác chỉ đạo, điều hành",

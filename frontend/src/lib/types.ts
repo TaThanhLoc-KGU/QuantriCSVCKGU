@@ -140,3 +140,28 @@ export interface StudentEmailLookupResult {
   major: string | null;
   email: string;
 }
+
+// ---- Thuong hieu website, thu vien, hom thu ----
+
+export interface SiteInfo {
+  name: string;
+  subtitle: string;
+  logoUrl: string;
+  address: string;
+  address2: string;
+  phone: string;
+  email: string;
+  facebook: string;
+  youtube: string;
+  parentUrl: string;
+  description: string;
+}
+
+export interface GalleryItem {
+  id: number;
+  type: "IMAGE" | "VIDEO";
+  title: string | null;
+  url: string;
+  sortOrder: number;
+  active: boolean;
+}

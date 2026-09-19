@@ -1,31 +1,54 @@
 import { Link } from "react-router-dom";
+import { useSiteInfo } from "../lib/useSiteInfo";
+import { VisitorCounter } from "./VisitorCounter";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
+  const site = useSiteInfo();
 
   return (
     <footer className="mt-16 border-t border-neutral-200 bg-brand-900 text-brand-100">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3">
         <div>
-          <p className="text-base font-bold text-white">Phòng Quản trị Cơ sở vật chất</p>
-          <p className="mt-1 text-sm text-brand-200">Trường Đại học Kiên Giang</p>
-          <p className="mt-3 text-sm leading-relaxed text-brand-200">
-            Tầng 7, Nhà Điều hành, Trường Đại học Kiên Giang
-          </p>
-          <p className="mt-3 text-sm leading-relaxed text-brand-200">
-            320A, Quốc lộ 61, Xã Châu Thành, Tỉnh An Giang
-          </p>
+          <p className="text-base font-bold text-white">{site.name}</p>
+          <p className="mt-1 text-sm text-brand-200">{site.subtitle}</p>
+          {site.address && <p className="mt-3 text-sm leading-relaxed text-brand-200">{site.address}</p>}
+          {site.address2 && <p className="mt-3 text-sm leading-relaxed text-brand-200">{site.address2}</p>}
         </div>
 
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-300">Liên hệ</p>
           <ul className="mt-3 space-y-2 text-sm text-brand-200">
-            <li>
-              <a href="mailto:pqtcsvc@vnkgu.edu.vn" className="hover:text-white hover:underline">
-                qtcsvc@vnkgu.edu.vn
-              </a>
-            </li>
+            {site.email && (
+              <li>
+                <a href={`mailto:${site.email}`} className="hover:text-white hover:underline">
+                  {site.email}
+                </a>
+              </li>
+            )}
+            {site.phone && (
+              <li>
+                <a href={`tel:${site.phone.replace(/\s/g, "")}`} className="hover:text-white hover:underline">
+                  {site.phone}
+                </a>
+              </li>
+            )}
+            {site.facebook && (
+              <li>
+                <a href={site.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-white hover:underline">
+                  Facebook
+                </a>
+              </li>
+            )}
+            {site.youtube && (
+              <li>
+                <a href={site.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-white hover:underline">
+                  YouTube
+                </a>
+              </li>
+            )}
           </ul>
+          <VisitorCounter />
         </div>
 
         <div>
@@ -43,7 +66,12 @@ export function SiteFooter() {
             </li>
             <li>
               <Link to="/cong-khai" className="hover:text-white hover:underline">
-                Công khai mua sắm
+                Công khai
+              </Link>
+            </li>
+            <li>
+              <Link to="/hom-thu-gop-y" className="hover:text-white hover:underline">
+                Hòm thư góp ý
               </Link>
             </li>
             <li>
@@ -52,17 +80,24 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
-              <Link to="/tra-cuu-ket-qua" className="hover:text-white hover:underline">
-                Tra cứu kết quả xử lý
+              <Link to="/tra-cuu-email" className="hover:text-white hover:underline">
+                Tra cứu email sinh viên
               </Link>
             </li>
+            {site.parentUrl && (
+              <li>
+                <a href={site.parentUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white hover:underline">
+                  Website Trường
+                </a>
+              </li>
+            )}
           </ul>
         </div>
       </div>
 
       <div className="border-t border-brand-800">
         <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-brand-300">
-          © {year} Phòng Quản trị Cơ sở vật chất — Trường Đại học Kiên Giang.
+          © {year} {site.name} — {site.subtitle}.
         </p>
       </div>
     </footer>
