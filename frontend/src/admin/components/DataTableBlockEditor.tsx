@@ -3,6 +3,7 @@ import { adminApi, ApiError } from "../api";
 import type { DataTableColumn, DataTableGroup, PageBlockView, PageTableRowView } from "../types";
 import { Button, Select, TextInput } from "./ui";
 import { ClipIcon } from "./glyphs";
+import { RowItemsModal } from "./RowItemsModal";
 
 function randomKey(): string {
   return Math.random().toString(36).slice(2, 10);
@@ -22,6 +23,8 @@ export function DataTableBlockEditor({ block, onBlockChanged }: Props) {
   const [newGroupName, setNewGroupName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [uploadingCell, setUploadingCell] = useState<string | null>(null);
+  const [itemsRow, setItemsRow] = useState<PageTableRowView | null>(null);
+  const detail = block.config.detail as { enabled?: boolean; buttonLabel?: string; columns?: { key: string; label: string }[] } | undefined;
 
   useEffect(() => setRows(block.rows), [block.rows]);
 
@@ -196,8 +199,23 @@ export function DataTableBlockEditor({ block, onBlockChanged }: Props) {
     );
   }
 
+  async function reloadBlock() {
+    const list = await adminApi.pages.blocks.list(block.categoryId);
+    const fresh = list.find((b) => b.id === block.id);
+    if (fresh) onBlockChanged(fresh);
+  }
+
   return (
     <div className="space-y-4 rounded-md border border-neutral-200 bg-neutral-50/60 p-3">
+      {itemsRow && (
+        <RowItemsModal
+          row={itemsRow}
+          title={(block.config.detail as { title?: string } | undefined)?.title ?? "Chi tiết"}
+          columns={detail?.columns ?? []}
+          onClose={() => setItemsRow(null)}
+          onChanged={() => void reloadBlock()}
+        />
+      )}
       {error && <p className="text-xs text-urgent-600">{error}</p>}
 
       <div>
@@ -301,7 +319,12 @@ export function DataTableBlockEditor({ block, onBlockChanged }: Props) {
                       </td>
                     ))}
                     <td className="px-3 py-2">
-                      <div className="flex gap-1">
+                      <div className="flex flex-wrap gap-1">
+                        {detail?.enabled && (
+                          <button onClick={() => setItemsRow(row)} className="rounded-md border border-brand-300 px-2 py-0.5 text-xs font-semibold text-brand-700 hover:bg-brand-50">
+                            Chi tiết ({row.itemCount})
+                          </button>
+                        )}
                         <button onClick={() => void moveRow(row.id, "UP")} className="text-neutral-400 hover:text-neutral-700" title="Lên">
                           ↑
                         </button>

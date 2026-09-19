@@ -9,7 +9,19 @@ import com.ttloc.qtcsvc.content.PageBlockType;
 import com.ttloc.qtcsvc.content.PageTableRow;
 import com.ttloc.qtcsvc.shared.Json;
 import com.ttloc.qtcsvc.shared.NotFoundException;
+import com.ttloc.qtcsvc.content.PageTableRowItem;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -33,9 +45,11 @@ class PageBlockService {
     private final PageTableRowRepository rowRepository;
     private final CategoryService categoryService;
     private final ObjectMapper objectMapper;
+    private final PageTableRowItemRepository itemRepository;
 
     PageBlockService(PageBlockRepository blockRepository, PageTableRowRepository rowRepository,
-                      CategoryService categoryService, ObjectMapper objectMapper) {
+                      CategoryService categoryService, ObjectMapper objectMapper, PageTableRowItemRepository itemRepository) {
+        this.itemRepository = itemRepository;
         this.blockRepository = blockRepository;
         this.rowRepository = rowRepository;
         this.categoryService = categoryService;
@@ -121,6 +135,83 @@ class PageBlockService {
         return toRowView(getRow(rowId));
     }
 
+    // ---- Danh sach chi tiet cua 1 dong (vd hoc phan cua nganh), nhap tu Excel ----
+
+    List<Map<String, Object>> itemsOf(Long rowId) {
+        getRow(rowId);
+        return itemRepository.findByRowIdOrderBySortOrder(rowId).stream().map(i -> readJson(i.data())).toList();
+    }
+
+    /**
+     * Doc Excel (dong 1 la tieu de). commit=false: chi tra so dong + tieu de. commit=true: thay toan bo muc chi tiet
+     * cua dong; neu khoi chua co cot chi tiet thi tao tu tieu de, neu da co thi map theo thu tu cot.
+     */
+    @Transactional
+    Map<String, Object> importItems(Long rowId, MultipartFile file, boolean commit) {
+        PageTableRow row = getRow(rowId);
+        DataFormatter fmt = new DataFormatter();
+        List<String> headers = new ArrayList<>();
+        List<List<String>> data = new ArrayList<>();
+        try (Workbook wb = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = wb.getSheetAt(0);
+            Row head = sheet.getRow(0);
+            if (head == null) throw new IllegalArgumentException("File trống");
+            int cols = head.getLastCellNum();
+            for (int c = 0; c < cols; c++) {
+                Cell cell = head.getCell(c);
+                String h = cell == null ? "" : fmt.formatCellValue(cell).trim();
+                headers.add(h.isEmpty() ? "Cột " + (c + 1) : h);
+            }
+            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+                Row rr = sheet.getRow(r);
+                if (rr == null) continue;
+                List<String> vals = new ArrayList<>();
+                boolean any = false;
+                for (int c = 0; c < cols; c++) {
+                    Cell cell = rr.getCell(c);
+                    String v = cell == null ? "" : fmt.formatCellValue(cell).trim();
+                    if (!v.isEmpty()) any = true;
+                    vals.add(v);
+                }
+                if (any) data.add(vals);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Không đọc được file Excel", e);
+        }
+        if (!commit) return Map.of("rowCount", data.size(), "headers", headers);
+
+        PageBlock block = getBlock(row.blockId());
+        Map<String, Object> config = new LinkedHashMap<>(readJson(block.config()));
+        Map<String, Object> detail = new LinkedHashMap<>();
+        if (config.get("detail") instanceof Map<?, ?> m) m.forEach((k, v) -> detail.put(String.valueOf(k), v));
+        List<?> existing = detail.get("columns") instanceof List<?> l ? l : List.of();
+        List<Map<String, Object>> cols = new ArrayList<>();
+        if (existing.isEmpty()) {
+            for (int i = 0; i < headers.size(); i++) cols.add(new LinkedHashMap<>(Map.of("key", "d" + (i + 1), "label", headers.get(i))));
+            detail.put("columns", cols);
+            config.put("detail", detail);
+            blockRepository.save(new PageBlock(block.id(), block.categoryId(), block.type(), block.title(), block.sortOrder(),
+                    writeJson(config), block.createdAt(), Instant.now()));
+        } else {
+            for (Object o : existing) if (o instanceof Map<?, ?> m) cols.add(new LinkedHashMap<>((Map<String, Object>) m));
+        }
+        itemRepository.deleteAllByRow(rowId);
+        List<PageTableRowItem> batch = new ArrayList<>();
+        int order = 0;
+        for (List<String> vals : data) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            for (int i = 0; i < cols.size() && i < vals.size(); i++) m.put(String.valueOf(cols.get(i).get("key")), vals.get(i));
+            batch.add(new PageTableRowItem(null, rowId, order++, writeJson(m)));
+        }
+        itemRepository.saveAll(batch);
+        return Map.of("importedCount", batch.size());
+    }
+
+    void clearItems(Long rowId) {
+        getRow(rowId);
+        itemRepository.deleteAllByRow(rowId);
+    }
+
     private PageBlock requireDataTableBlock(Long blockId) {
         PageBlock block = getBlock(blockId);
         if (block.type() != PageBlockType.DATA_TABLE) {
@@ -172,7 +263,7 @@ class PageBlockService {
     }
 
     private RowView toRowView(PageTableRow row) {
-        return new RowView(row.id(), row.groupKey(), row.sortOrder(), readJson(row.data()));
+        return new RowView(row.id(), row.groupKey(), row.sortOrder(), readJson(row.data()), itemRepository.countByRowId(row.id()), List.of());
     }
 
     private Json writeJson(Map<String, Object> data) {

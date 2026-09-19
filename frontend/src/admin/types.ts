@@ -274,6 +274,8 @@ export interface PageTableRowView {
   groupKey: string | null;
   sortOrder: number;
   data: Record<string, unknown>;
+  itemCount: number;
+  items: Record<string, unknown>[];
 }
 
 export interface PageBlockView {

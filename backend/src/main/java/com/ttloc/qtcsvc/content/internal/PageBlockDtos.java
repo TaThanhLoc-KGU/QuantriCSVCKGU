@@ -20,7 +20,7 @@ final class PageBlockDtos {
     record RowRequest(String groupKey, Map<String, Object> data) {
     }
 
-    record RowView(Long id, String groupKey, int sortOrder, Map<String, Object> data) {
+    record RowView(Long id, String groupKey, int sortOrder, Map<String, Object> data, long itemCount, List<Map<String, Object>> items) {
     }
 
     record MoveRequest(Direction direction) {

@@ -36,10 +36,13 @@ interface BlockFormState {
   groupFilterEnabled: boolean;
   groupLabel: string;
   columns: DataTableColumn[];
+  detailEnabled: boolean;
+  detailButton: string;
+  detailTitle: string;
 }
 
 function emptyForm(): BlockFormState {
-  return { title: "", html: "", postCategoryId: null, limit: 6, groupFilterEnabled: false, groupLabel: "", columns: [] };
+  return { title: "", html: "", postCategoryId: null, limit: 6, groupFilterEnabled: false, groupLabel: "", columns: [], detailEnabled: false, detailButton: "Xem chi tiết", detailTitle: "Chi tiết" };
 }
 
 function formFromBlock(block: PageBlockView): BlockFormState {
@@ -54,6 +57,12 @@ function formFromBlock(block: PageBlockView): BlockFormState {
     base.groupFilterEnabled = !!block.config.groupLabel;
     base.groupLabel = (block.config.groupLabel as string) ?? "";
     base.columns = (block.config.columns as DataTableColumn[]) ?? [];
+    const d = block.config.detail as { enabled?: boolean; buttonLabel?: string; title?: string } | undefined;
+    if (d) {
+      base.detailEnabled = !!d.enabled;
+      base.detailButton = d.buttonLabel ?? base.detailButton;
+      base.detailTitle = d.title ?? base.detailTitle;
+    }
   }
   return base;
 }
@@ -117,6 +126,12 @@ export function PageBuilderPage() {
         groupLabel: f.groupFilterEnabled ? f.groupLabel.trim() || "Nhóm" : null,
         columns: f.columns,
         groups: existing?.config.groups ?? [],
+        detail: {
+          enabled: f.detailEnabled,
+          buttonLabel: f.detailButton.trim() || "Xem chi tiết",
+          title: f.detailTitle.trim() || "Chi tiết",
+          columns: (existing?.config.detail as { columns?: unknown } | undefined)?.columns ?? [],
+        },
       };
     }
     return {};
@@ -310,6 +325,21 @@ export function PageBuilderPage() {
                 <Field label="Tên bộ lọc" hint="Ví dụ: Ngành đào tạo, Loại hồ sơ…">
                   <TextInput value={form.groupLabel} onChange={(e) => setForm({ ...form, groupLabel: e.target.value })} />
                 </Field>
+              )}
+              <Checkbox
+                label="Mỗi dòng có danh sách chi tiết riêng (vd: ngành đào tạo → danh sách học phần)"
+                checked={form.detailEnabled}
+                onChange={(e) => setForm({ ...form, detailEnabled: e.target.checked })}
+              />
+              {form.detailEnabled && (
+                <>
+                  <Field label="Nhãn nút ở mỗi dòng" hint="Ví dụ: Tìm học phần">
+                    <TextInput value={form.detailButton} onChange={(e) => setForm({ ...form, detailButton: e.target.value })} />
+                  </Field>
+                  <Field label="Tiêu đề bảng chi tiết" hint="Ví dụ: Danh sách học phần">
+                    <TextInput value={form.detailTitle} onChange={(e) => setForm({ ...form, detailTitle: e.target.value })} />
+                  </Field>
+                </>
               )}
               <p className="text-xs text-neutral-400">
                 Cột dữ liệu và các dòng được quản lý sau khi lưu khối — mở lại khối này trong danh sách bên dưới để chỉnh sửa.

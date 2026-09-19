@@ -464,6 +464,19 @@ export const adminApi = {
       update: (rowId: number, body: PageTableRowRequest): Promise<PageTableRowView> =>
         putJson(`/api/admin/pages/rows/${rowId}`, body),
       remove: (rowId: number): Promise<void> => del(`/api/admin/pages/rows/${rowId}`),
+      items: (rowId: number): Promise<Record<string, unknown>[]> => getJson(`/api/admin/pages/rows/${rowId}/items`),
+      clearItems: (rowId: number): Promise<void> => del(`/api/admin/pages/rows/${rowId}/items`),
+      importItems: async (rowId: number, file: File, commit: boolean): Promise<{ rowCount?: number; headers?: string[]; importedCount?: number }> => {
+        await ensureCsrfCookie();
+        const token = readCookie("XSRF-TOKEN");
+        const fd = new FormData();
+        fd.append("file", file);
+        const headers = new Headers();
+        if (token) headers.set("X-XSRF-TOKEN", token);
+        const res = await fetch(`/api/admin/pages/rows/${rowId}/items/import?preview=${commit ? "false" : "true"}`, { method: "POST", body: fd, headers, credentials: "include" });
+        if (!res.ok) throw new ApiError(res.status, `Đọc file thất bại (${res.status})`);
+        return res.json();
+      },
       move: (rowId: number, direction: "UP" | "DOWN"): Promise<PageTableRowView> =>
         patchJson(`/api/admin/pages/rows/${rowId}/move`, { direction }),
     },

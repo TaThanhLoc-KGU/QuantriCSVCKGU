@@ -40,10 +40,12 @@ class PageRenderService {
     private final PostRepository postRepository;
     private final MemberQueryService memberQueryService;
     private final ObjectMapper objectMapper;
+    private final PageTableRowItemRepository itemRepository;
 
     PageRenderService(CategoryRepository categoryRepository, PageBlockRepository blockRepository,
                        PageTableRowRepository rowRepository, PostRepository postRepository,
-                       MemberQueryService memberQueryService, ObjectMapper objectMapper) {
+                       MemberQueryService memberQueryService, ObjectMapper objectMapper, PageTableRowItemRepository itemRepository) {
+        this.itemRepository = itemRepository;
         this.categoryRepository = categoryRepository;
         this.blockRepository = blockRepository;
         this.rowRepository = rowRepository;
@@ -98,9 +100,20 @@ class PageRenderService {
         List<Member> staff = List.of();
 
         switch (block.type()) {
-            case DATA_TABLE -> rows = rowRepository.findByBlockIdOrderBySortOrder(block.id()).stream()
-                    .map(r -> new RowView(r.id(), r.groupKey(), r.sortOrder(), readJson(r.data())))
-                    .toList();
+            case DATA_TABLE -> {
+                var tableRows = rowRepository.findByBlockIdOrderBySortOrder(block.id());
+                Map<Long, List<Map<String, Object>>> itemsByRow = new LinkedHashMap<>();
+                if (!tableRows.isEmpty()) {
+                    itemRepository.findByRowIdInOrderBySortOrder(tableRows.stream().map(r -> r.id()).toList())
+                            .forEach(it -> itemsByRow.computeIfAbsent(it.rowId(), k -> new ArrayList<>()).add(readJson(it.data())));
+                }
+                rows = tableRows.stream()
+                        .map(r -> {
+                            List<Map<String, Object>> items = itemsByRow.getOrDefault(r.id(), List.of());
+                            return new RowView(r.id(), r.groupKey(), r.sortOrder(), readJson(r.data()), items.size(), items);
+                        })
+                        .toList();
+            }
             case POST_LIST -> {
                 Object categoryIdRaw = config.get("categoryId");
                 if (categoryIdRaw instanceof Number categoryIdNumber) {
