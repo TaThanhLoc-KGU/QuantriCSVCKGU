@@ -81,6 +81,14 @@ class PageBlockAdminController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping(value = "/blocks/{blockId}/items/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    Map<String, Object> importItemsBulk(@PathVariable Long blockId, @RequestParam(defaultValue = "true") boolean preview,
+                                        @RequestParam(defaultValue = "0") int keyIndex,
+                                        @RequestParam(defaultValue = "true") boolean createMissing,
+                                        @RequestParam("file") MultipartFile file) {
+        return service.importItemsBulk(blockId, file, keyIndex, createMissing, !preview);
+    }
+
     @GetMapping("/rows/{rowId}/items")
     List<Map<String, Object>> items(@PathVariable Long rowId) {
         return service.itemsOf(rowId);

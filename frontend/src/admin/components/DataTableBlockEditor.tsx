@@ -4,6 +4,7 @@ import type { DataTableColumn, DataTableGroup, PageBlockView, PageTableRowView }
 import { Button, Select, TextInput } from "./ui";
 import { ClipIcon } from "./glyphs";
 import { RowItemsModal } from "./RowItemsModal";
+import { BulkItemsModal } from "./BulkItemsModal";
 
 function randomKey(): string {
   return Math.random().toString(36).slice(2, 10);
@@ -24,6 +25,7 @@ export function DataTableBlockEditor({ block, onBlockChanged }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [uploadingCell, setUploadingCell] = useState<string | null>(null);
   const [itemsRow, setItemsRow] = useState<PageTableRowView | null>(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const detail = block.config.detail as { enabled?: boolean; buttonLabel?: string; columns?: { key: string; label: string }[] } | undefined;
 
   useEffect(() => setRows(block.rows), [block.rows]);
@@ -207,6 +209,14 @@ export function DataTableBlockEditor({ block, onBlockChanged }: Props) {
 
   return (
     <div className="space-y-4 rounded-md border border-neutral-200 bg-neutral-50/60 p-3">
+      {bulkOpen && (
+        <BulkItemsModal
+          blockId={block.id}
+          title={(block.config.detail as { title?: string } | undefined)?.title ?? "Chi tiết"}
+          onClose={() => setBulkOpen(false)}
+          onDone={() => void reloadBlock()}
+        />
+      )}
       {itemsRow && (
         <RowItemsModal
           row={itemsRow}
@@ -342,10 +352,15 @@ export function DataTableBlockEditor({ block, onBlockChanged }: Props) {
             </table>
           </div>
         )}
-        <div className="mt-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           <Button size="sm" variant="secondary" onClick={addRow} disabled={columns.length === 0}>
             + Thêm dòng
           </Button>
+          {detail?.enabled && (
+            <Button size="sm" onClick={() => setBulkOpen(true)}>
+              Nhập chi tiết cho cả bảng từ 1 file Excel
+            </Button>
+          )}
         </div>
       </div>
     </div>

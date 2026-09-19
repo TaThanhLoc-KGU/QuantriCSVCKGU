@@ -207,6 +207,135 @@ class PageBlockService {
         return Map.of("importedCount", batch.size());
     }
 
+    /** Chuan hoa ten de so khop: bo dau, thuong hoa, gop khoang trang. */
+    private static String norm(String s) {
+        if (s == null) return "";
+        String n = java.text.Normalizer.normalize(s.trim().toLowerCase(), java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "").replace('đ', 'd');
+        return n.replaceAll("\\s+", " ");
+    }
+
+    private String rowName(PageBlock block, PageTableRow row) {
+        Map<String, Object> data = readJson(row.data());
+        Object cols = readJson(block.config()).get("columns");
+        if (cols instanceof List<?> l && !l.isEmpty() && l.get(0) instanceof Map<?, ?> c && c.get("key") != null) {
+            Object v = data.get(String.valueOf(c.get("key")));
+            if (v != null) return v.toString();
+        }
+        return String.valueOf(data.values().stream().filter(v -> v instanceof String).findFirst().orElse(""));
+    }
+
+    /**
+     * Nhap 1 lan cho ca bang: 1 file Excel chung, 1 cot xac dinh dong (vd "Nganh"), cac cot con lai la chi tiet.
+     * Khop dong theo ten (bo dau/hoa thuong); createMissing=true thi tao dong moi cho ten chua co.
+     * commit=false: tra ve tieu de, so dong va tung nhom (co khop dong nao khong).
+     */
+    @Transactional
+    Map<String, Object> importItemsBulk(Long blockId, MultipartFile file, int keyIndex, boolean createMissing, boolean commit) {
+        PageBlock block = requireDataTableBlock(blockId);
+        DataFormatter fmt = new DataFormatter();
+        List<String> headers = new ArrayList<>();
+        List<List<String>> data = new ArrayList<>();
+        try (Workbook wb = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = wb.getSheetAt(0);
+            Row head = sheet.getRow(0);
+            if (head == null) throw new IllegalArgumentException("File trống");
+            int cols = head.getLastCellNum();
+            for (int c = 0; c < cols; c++) {
+                Cell cell = head.getCell(c);
+                String h = cell == null ? "" : fmt.formatCellValue(cell).trim();
+                headers.add(h.isEmpty() ? "Cột " + (c + 1) : h);
+            }
+            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+                Row rr = sheet.getRow(r);
+                if (rr == null) continue;
+                List<String> vals = new ArrayList<>();
+                boolean any = false;
+                for (int c = 0; c < cols; c++) {
+                    Cell cell = rr.getCell(c);
+                    String v = cell == null ? "" : fmt.formatCellValue(cell).trim();
+                    if (!v.isEmpty()) any = true;
+                    vals.add(v);
+                }
+                if (any) data.add(vals);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Không đọc được file Excel", e);
+        }
+        if (keyIndex < 0 || keyIndex >= headers.size()) throw new IllegalArgumentException("Cột xác định ngành không hợp lệ");
+
+        Map<String, List<List<String>>> byName = new LinkedHashMap<>();
+        Map<String, String> display = new LinkedHashMap<>();
+        for (List<String> vals : data) {
+            String name = vals.get(keyIndex);
+            if (name.isBlank()) continue;
+            String k = norm(name);
+            byName.computeIfAbsent(k, x -> new ArrayList<>()).add(vals);
+            display.putIfAbsent(k, name);
+        }
+
+        List<PageTableRow> existingRows = rowRepository.findByBlockIdOrderBySortOrder(blockId);
+        Map<String, PageTableRow> rowByName = new LinkedHashMap<>();
+        for (PageTableRow r : existingRows) rowByName.putIfAbsent(norm(rowName(block, r)), r);
+
+        if (!commit) {
+            List<Map<String, Object>> groups = new ArrayList<>();
+            for (var e : byName.entrySet()) {
+                groups.add(Map.of("name", display.get(e.getKey()), "count", e.getValue().size(), "matched", rowByName.containsKey(e.getKey())));
+            }
+            return Map.of("headers", headers, "rowCount", data.size(), "groups", groups);
+        }
+
+        // Cot chi tiet = tat ca cot tru cot khoa; dung lai bo cot cu neu da co.
+        List<Integer> detailIdx = new ArrayList<>();
+        for (int i = 0; i < headers.size(); i++) if (i != keyIndex) detailIdx.add(i);
+        Map<String, Object> config = new LinkedHashMap<>(readJson(block.config()));
+        Map<String, Object> detail = new LinkedHashMap<>();
+        if (config.get("detail") instanceof Map<?, ?> m) m.forEach((k, v) -> detail.put(String.valueOf(k), v));
+        List<Map<String, Object>> cols = new ArrayList<>();
+        if (detail.get("columns") instanceof List<?> l) for (Object o : l) if (o instanceof Map<?, ?> m) {
+            Map<String, Object> cm = new LinkedHashMap<>();
+            m.forEach((k, v) -> cm.put(String.valueOf(k), v));
+            cols.add(cm);
+        }
+        if (cols.isEmpty()) {
+            for (int n = 0; n < detailIdx.size(); n++) {
+                cols.add(new LinkedHashMap<>(Map.of("key", "d" + (n + 1), "label", headers.get(detailIdx.get(n)))));
+            }
+            detail.put("columns", cols);
+            config.put("detail", detail);
+            blockRepository.save(new PageBlock(block.id(), block.categoryId(), block.type(), block.title(), block.sortOrder(),
+                    writeJson(config), block.createdAt(), Instant.now()));
+        }
+
+        String nameKey = "";
+        if (readJson(block.config()).get("columns") instanceof List<?> l && !l.isEmpty() && l.get(0) instanceof Map<?, ?> c0) nameKey = String.valueOf(c0.get("key"));
+        int nextOrder = existingRows.stream().mapToInt(PageTableRow::sortOrder).max().orElse(-1) + 1;
+        int programs = 0;
+        int items = 0;
+        int created = 0;
+        for (var e : byName.entrySet()) {
+            PageTableRow row = rowByName.get(e.getKey());
+            if (row == null) {
+                if (!createMissing || nameKey.isBlank()) continue;
+                row = rowRepository.save(new PageTableRow(null, blockId, null, nextOrder++, writeJson(Map.of(nameKey, display.get(e.getKey())))));
+                created++;
+            }
+            itemRepository.deleteAllByRow(row.id());
+            List<PageTableRowItem> batch = new ArrayList<>();
+            int order = 0;
+            for (List<String> vals : e.getValue()) {
+                Map<String, Object> m = new LinkedHashMap<>();
+                for (int n = 0; n < cols.size() && n < detailIdx.size(); n++) m.put(String.valueOf(cols.get(n).get("key")), vals.get(detailIdx.get(n)));
+                batch.add(new PageTableRowItem(null, row.id(), order++, writeJson(m)));
+            }
+            itemRepository.saveAll(batch);
+            programs++;
+            items += batch.size();
+        }
+        return Map.of("programs", programs, "items", items, "createdRows", created);
+    }
+
     void clearItems(Long rowId) {
         getRow(rowId);
         itemRepository.deleteAllByRow(rowId);
