@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: qtcsvc
+
+  # backend/compose.yaml co ca postgres, mysql, mariadb -> Spring Boot Docker Compose
+  # se dang ky nhieu JdbcConnectionDetails ung vien gay xung dot khi khoi dong.
+  # Dev dung root docker-compose.yml (chi postgres + minio) va chay app rieng.
+  docker:
+    compose:
+      enabled: false
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/qtcsvc
+    username: qtcsvc
+    password: qtcsvc
+
+  flyway:
+    locations: classpath:db/migration
+
+  ai:
+    # Khong dung ChatModel autoconfigure tinh: API key AI do ADMIN nhap qua
+    # Settings (luu ma hoa trong system_settings), module report se tu dung
+    # Client/ChatModel luc goi dua tren cau hinh doc tu DB (xem spec 8.3).
+    model:
+      chat: none
+
+  session:
+    store-type: jdbc
+    jdbc:
+      # schema da co san trong Flyway migration V1__spring_session_schema.sql
+      initialize-schema: never
+
+  batch:
+    jdbc:
+      # schema da co san trong Flyway migration V10__spring_batch_schema.sql
+      initialize-schema: never
+
+  # Khai bao registration "google" o day se bi spring-boot-starter-oauth2-client
+  # validate ngay luc khoi dong (bat buoc client-id/secret non-empty), du chua dung toi.
+  # Se bat lai cung gia tri that (GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET) khi lam SSO
+  # trong module identity.
+  # security:
+  #   oauth2:
+  #     client:
+  #       registration:
+  #         google:
+  #           client-id: ${GOOGLE_CLIENT_ID}
+  #           client-secret: ${GOOGLE_CLIENT_SECRET}
+  #           scope:
+  #             - openid
+  #             - email
+  #             - profile
+
+app:
+  minio:
+    endpoint: http://localhost:9000
+    access-key: ${MINIO_ACCESS_KEY:qtcsvc}
+    secret-key: ${MINIO_SECRET_KEY:qtcsvc123}
+    bucket: qtcsvc
+  security:
+    # AES key dung de ma hoa gia tri secret trong system_settings (vd ai.apiKey)
+    settings-secret-key: ${APP_SETTINGS_SECRET_KEY:}
+  sso:
+    default-allowed-domain: vnkgu.edu.vn
+  congvan:
+    # Tich hop he thong Cong van hoan toan qua HTTP API (khong con ket noi
+    # thang SQL Server nua - bo Windows Integrated Auth vi chi chay duoc tren
+    # Windows). Chay tren cung server (100.110.62.27) nen dung 127.0.0.1 lam
+    # mac dinh khi be chay tren do.
+    #
+    # - vanban-cong-khai: cong khai, khong can API key (van ban DI da cong khai).
+    # - vanban-den / vanbannoibo: can X-Api-Key, moi key gan dung 1 don vi
+    #   (QTCSVC) - cap tai CongVan > Quan tri he thong > API Key don vi.
+    public-api-base-url: ${CONGVAN_PUBLIC_API_URL:http://127.0.0.1:5100/api/v1/vanban-cong-khai}
+    den-api-base-url: ${CONGVAN_DEN_API_URL:http://127.0.0.1:5100/api/v1/vanban-den}
+    noibo-api-base-url: ${CONGVAN_NOIBO_API_URL:http://127.0.0.1:5100/api/v1/vanbannoibo}
+    api-key: ${CONGVAN_API_KEY:}
+
+server:
+  port: 8080

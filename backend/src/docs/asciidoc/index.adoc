@@ -1,0 +1,129 @@
+= QTCSVC API Reference
+:doctype: book
+:toc: left
+:toclevels: 2
+:sectlinks:
+:source-highlighter: highlightjs
+
+Tai lieu API sinh tu dong bang Spring REST Docs (test that, khong phai mo ta tay).
+Chi bao gom cac luong da co test - xem `src/test/java` de biet pham vi da kiem thu.
+
+== Xac thuc (identity)
+
+=== Dang nhap
+operation::auth-login[snippets='http-request,http-response,request-fields,response-fields']
+
+=== Dang nhap sai mat khau
+operation::auth-login-failure[snippets='http-request,http-response']
+
+=== Thong tin nguoi dang nhap
+operation::auth-me[snippets='http-request,http-response']
+
+=== Dang xuat
+operation::auth-logout[snippets='http-request,http-response']
+
+== Quan ly nguoi dung & nhan su (ADMIN)
+
+=== Tao tai khoan
+operation::user-create[snippets='http-request,http-response']
+
+=== Sua tai khoan
+operation::user-update[snippets='http-request,http-response']
+
+=== Doi mat khau
+operation::user-reset-password[snippets='http-request,http-response']
+
+=== Xoa tai khoan
+operation::user-delete[snippets='http-request,http-response']
+
+=== STAFF khong duoc xem danh sach tai khoan
+operation::user-list-forbidden-for-staff[snippets='http-request,http-response']
+
+=== Tao nhan su (Member)
+operation::member-create[snippets='http-request,http-response']
+
+=== Sua / xoa / danh sach nhan su
+operation::member-update[snippets='http-request,http-response']
+
+operation::member-list[snippets='http-request,http-response']
+
+operation::member-delete[snippets='http-request,http-response']
+
+== Noi dung / Public (content)
+
+=== Tao danh muc
+operation::category-create[snippets='http-request,http-response']
+
+=== Danh sach danh muc
+operation::category-list[snippets='http-request,http-response']
+
+=== Tao bai viet (dang ngay)
+operation::post-create[snippets='http-request,http-response']
+
+=== STAFF khong duoc sua bai cua nguoi khac
+operation::post-update-forbidden[snippets='http-request,http-response']
+
+=== Xem chi tiet bai viet (public, tang view)
+operation::public-post-detail[snippets='http-request,http-response']
+
+=== Danh sach bai viet public (phan trang)
+operation::public-post-list[snippets='http-request,http-response']
+
+== So so van ban (documentregister)
+
+=== Danh sach loai van ban
+operation::document-type-list[snippets='http-request,http-response']
+
+=== Xin so van ban
+operation::document-number-create[snippets='http-request,http-response']
+
+=== Goi y so ke tiep
+operation::document-number-next[snippets='http-request,http-response']
+
+=== Canh bao trung so (khong khoa cung)
+operation::document-number-duplicate-warning[snippets='http-request,http-response']
+
+=== Xac nhan van luu du trung so
+operation::document-number-duplicate-confirmed[snippets='http-request,http-response']
+
+== Nhiem vu (tasks)
+
+=== Tao nhiem vu
+operation::task-create[snippets='http-request,http-response']
+
+=== Them buoc vao nhiem vu
+operation::task-step-create[snippets='http-request,http-response']
+
+=== Doi trang thai buoc (tu tinh lai tien do)
+operation::task-step-status-update[snippets='http-request,http-response']
+
+=== Sap xep lai thu tu buoc
+operation::task-step-reorder[snippets='http-request,http-response']
+
+=== Dashboard KPI
+operation::dashboard-kpi[snippets='http-request,http-response']
+
+=== Dashboard theo nhan su
+operation::dashboard-members[snippets='http-request,http-response']
+
+== Bao cao (report)
+
+=== Xem / tao rong bao cao theo ky
+operation::report-get[snippets='http-request,http-response']
+
+=== Cap nhat noi dung cac muc
+operation::report-update-sections[snippets='http-request,http-response']
+
+=== Xuat file Word
+operation::report-export-docx[snippets='http-request,http-response']
+
+== Cau hinh he thong (settings)
+
+=== Danh sach cau hinh
+operation::settings-list[snippets='http-request,http-response']
+
+=== Cap nhat cau hinh
+operation::settings-update[snippets='http-request,http-response']
+
+=== STAFF khong duoc truy cap
+operation::settings-forbidden-for-staff[snippets='http-request,http-response']
