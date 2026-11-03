@@ -43,7 +43,13 @@ function useNavGroups(): NavGroup[] {
         { to: "/admin/doi-chieu-cong-van", label: "Đối chiếu Công văn" },
       ],
     },
-    { label: "Công việc", items: [{ to: "/admin/nhiem-vu", label: "Nhiệm vụ" }] },
+    {
+      label: "Công việc",
+      items: [
+        { to: "/admin/nhiem-vu", label: "Nhiệm vụ" },
+        { to: "/admin/mua-sam", label: "Mua sắm VPP" },
+      ],
+    },
     {
       label: "Hỗ trợ sinh viên",
       items: [

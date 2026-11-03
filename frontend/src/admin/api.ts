@@ -23,6 +23,13 @@ import type {
   Report,
   SettingView,
   StudentEmailImportPreview,
+  ProcurementDetail,
+  ProcurementImportPreview,
+  ProcurementImportResult,
+  ProcurementItemRow,
+  ProcurementStatusRow,
+  ProcurementSummary,
+  ProcurementUnitRow,
   StudentEmailImportResult,
   StudentEmailListResponse,
   TaskView,
@@ -30,7 +37,7 @@ import type {
   ToolSubmission,
   ToolView,
 } from "./types";
-import type { Banner, Category, CategoryKind, Form, Notification, Post } from "../lib/types";
+import type { Banner, Category, CategoryKind, Form, Notification, Post, ProcurementAudience, ProcurementRound } from "../lib/types";
 
 export class ApiError extends Error {
   status: number;
@@ -479,6 +486,84 @@ export const adminApi = {
       },
       move: (rowId: number, direction: "UP" | "DOWN"): Promise<PageTableRowView> =>
         patchJson(`/api/admin/pages/rows/${rowId}/move`, { direction }),
+    },
+  },
+
+  procurement: {
+    rounds: (audience: ProcurementAudience): Promise<ProcurementRound[]> => getJson(withQuery("/api/admin/procurement/rounds", { audience })),
+    createRound: (body: { audience: ProcurementAudience; name: string; deadlineDate: string | null; accepting?: boolean; showPrevious?: boolean }): Promise<ProcurementRound> =>
+      postJson("/api/admin/procurement/rounds", body),
+    updateRound: (id: number, body: { audience: ProcurementAudience; name: string; deadlineDate: string | null; accepting?: boolean; showPrevious?: boolean }): Promise<ProcurementRound> =>
+      putJson(`/api/admin/procurement/rounds/${id}`, body),
+    deleteRound: (id: number): Promise<void> => del(`/api/admin/procurement/rounds/${id}`),
+    status: (id: number): Promise<ProcurementStatusRow[]> => getJson(`/api/admin/procurement/rounds/${id}/status`),
+    summary: (id: number): Promise<ProcurementSummary> => getJson(`/api/admin/procurement/rounds/${id}/summary`),
+    detail: (id: number, unitId: number): Promise<ProcurementDetail> => getJson(`/api/admin/procurement/rounds/${id}/units/${unitId}`),
+    clearSubmission: (id: number, unitId: number): Promise<void> => del(`/api/admin/procurement/rounds/${id}/units/${unitId}`),
+    handover: async (
+      id: number,
+      unitId: number,
+      body: {
+        date: string | null;
+        giverName: string;
+        giverAddress: string;
+        receiverName: string;
+        receiverAddress: string;
+        place: string;
+        content: string;
+        lines: { name: string; unit: string; qty: number; note: string }[];
+      },
+    ): Promise<Blob> => {
+      await ensureCsrfCookie();
+      const token = readCookie("XSRF-TOKEN");
+      const headers = new Headers({ "Content-Type": "application/json" });
+      if (token) headers.set("X-XSRF-TOKEN", token);
+      const res = await fetch(`/api/admin/procurement/rounds/${id}/units/${unitId}/handover`, { method: "POST", body: JSON.stringify(body), headers, credentials: "include" });
+      if (!res.ok) {
+        let detail = `Không xuất được biên bản (${res.status})`;
+        try {
+          const b = (await res.json()) as { detail?: string };
+          if (b.detail) detail = b.detail;
+        } catch {
+          // giu thong bao mac dinh
+        }
+        throw new ApiError(res.status, detail);
+      }
+      return res.blob();
+    },
+    exportUrl: (id: number) => `/api/admin/procurement/rounds/${id}/export`,
+
+    units: (audience: ProcurementAudience): Promise<ProcurementUnitRow[]> => getJson(withQuery("/api/admin/procurement/units", { audience })),
+    createUnit: (body: { audience: ProcurementAudience; code: string; name: string }): Promise<ProcurementUnitRow> => postJson("/api/admin/procurement/units", body),
+    updateUnit: (id: number, body: { code: string; name: string; sortOrder?: number; active?: boolean }): Promise<ProcurementUnitRow> => putJson(`/api/admin/procurement/units/${id}`, body),
+    deleteUnit: (id: number): Promise<void> => del(`/api/admin/procurement/units/${id}`),
+
+    itemTemplateUrl: "/api/admin/procurement/items/template",
+    items: (audience: ProcurementAudience): Promise<ProcurementItemRow[]> => getJson(withQuery("/api/admin/procurement/items", { audience })),
+    createItem: (body: { audience: ProcurementAudience; code: string; groupName: string; name: string; unitLabel: string }): Promise<ProcurementItemRow> =>
+      postJson("/api/admin/procurement/items", body),
+    updateItem: (id: number, body: { code: string; groupName: string; name: string; unitLabel: string; visible?: boolean }): Promise<ProcurementItemRow> =>
+      putJson(`/api/admin/procurement/items/${id}`, body),
+    deleteItem: (id: number): Promise<void> => del(`/api/admin/procurement/items/${id}`),
+    importItems: async (audience: ProcurementAudience, file: File, commit: boolean): Promise<ProcurementImportPreview & ProcurementImportResult> => {
+      await ensureCsrfCookie();
+      const token = readCookie("XSRF-TOKEN");
+      const fd = new FormData();
+      fd.append("file", file);
+      const headers = new Headers();
+      if (token) headers.set("X-XSRF-TOKEN", token);
+      const res = await fetch(`/api/admin/procurement/items/import?audience=${audience}&preview=${!commit}`, { method: "POST", body: fd, headers, credentials: "include" });
+      if (!res.ok) {
+        let detail = `Đọc file thất bại (${res.status})`;
+        try {
+          const body = (await res.json()) as { detail?: string };
+          if (body.detail) detail = body.detail;
+        } catch {
+          // giu thong bao mac dinh
+        }
+        throw new ApiError(res.status, detail);
+      }
+      return res.json();
     },
   },
 

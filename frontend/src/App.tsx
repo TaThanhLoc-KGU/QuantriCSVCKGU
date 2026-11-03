@@ -14,6 +14,7 @@ import { AccountRecoveryLookupPage } from "./pages/AccountRecoveryLookupPage";
 import { StudentEmailLookupPage } from "./pages/StudentEmailLookupPage";
 import { AllPostsPage } from "./pages/AllPostsPage";
 import { FeedbackPage } from "./pages/FeedbackPage";
+import { ProcurementListPage, ProcurementRoundPage } from "./pages/ProcurementPage";
 import { ToolPage } from "./pages/ToolPage";
 import { SearchPage } from "./pages/SearchPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
@@ -51,6 +52,7 @@ const ToolsPage = lazy(() => import("./admin/pages/ToolsPage").then((m) => ({ de
 const ToolBuilderPage = lazy(() => import("./admin/pages/ToolBuilderPage").then((m) => ({ default: m.ToolBuilderPage })));
 const FeedbackAdminPage = lazy(() => import("./admin/pages/FeedbackAdminPage").then((m) => ({ default: m.FeedbackAdminPage })));
 const GalleryAdminPage = lazy(() => import("./admin/pages/GalleryAdminPage").then((m) => ({ default: m.GalleryAdminPage })));
+const ProcurementAdminPage = lazy(() => import("./admin/pages/ProcurementAdminPage").then((m) => ({ default: m.ProcurementAdminPage })));
 const StudentEmailsPage = lazy(() => import("./admin/pages/StudentEmailsPage").then((m) => ({ default: m.StudentEmailsPage })));
 
 function AdminFallback() {
@@ -79,6 +81,8 @@ function App() {
           <Route path="tin-tuc" element={<AllPostsPage />} />
           <Route path="cong-cu/:slug" element={<ToolPage />} />
           <Route path="hom-thu-gop-y" element={<FeedbackPage />} />
+          <Route path="mua-sam" element={<ProcurementListPage />} />
+          <Route path="mua-sam/:roundId" element={<ProcurementRoundPage />} />
           <Route path="tra-cuu-email" element={<StudentEmailLookupPage />} />
           <Route path="tim-kiem" element={<SearchPage />} />
         </Route>
@@ -117,6 +121,7 @@ function App() {
             <Route path="gop-y" element={<FeedbackAdminPage />} />
             <Route path="thu-vien" element={<GalleryAdminPage />} />
             <Route path="danh-ba-email" element={<StudentEmailsPage />} />
+            <Route path="mua-sam" element={<ProcurementAdminPage />} />
             <Route path="nhiem-vu" element={<TasksPage />} />
             <Route path="bao-cao" element={<ReportsPage />} />
             <Route element={<ProtectedRoute roles={["ADMIN"]} />}>

@@ -9,6 +9,10 @@ import type {
   PageResponse,
   Post,
   PublicDisclosureResponse,
+  ProcurementForm,
+  ProcurementRound,
+  ProcurementSaveResult,
+  ProcurementUnitRef,
   PublicTool,
   SiteInfo,
   StudentEmailLookupResult,
@@ -83,6 +87,28 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   if (token) headers.set("X-XSRF-TOKEN", token);
 
   const res = await fetch(path, { method: "POST", body: JSON.stringify(body), headers, credentials: "include" });
+  if (!res.ok) {
+    let detail = `Yêu cầu thất bại (${res.status})`;
+    try {
+      const responseBody = (await res.json()) as { detail?: string };
+      if (responseBody.detail) detail = responseBody.detail;
+    } catch {
+      // than nien khong phai JSON, giu thong bao mac dinh
+    }
+    throw new ApiError(res.status, detail);
+  }
+  return (await res.json()) as T;
+}
+
+async function putJson<T>(path: string, body: unknown): Promise<T> {
+  if (!readCookie("XSRF-TOKEN")) {
+    await fetch("/api/auth/csrf", { credentials: "include" });
+  }
+  const token = readCookie("XSRF-TOKEN");
+  const headers = new Headers({ "Content-Type": "application/json" });
+  if (token) headers.set("X-XSRF-TOKEN", token);
+
+  const res = await fetch(path, { method: "PUT", body: JSON.stringify(body), headers, credentials: "include" });
   if (!res.ok) {
     let detail = `Yêu cầu thất bại (${res.status})`;
     try {
@@ -202,6 +228,27 @@ export const api = {
 
   toolLookup(slug: string, query: string): Promise<{ label: string; value: string }[]> {
     return postJson(`/api/public/tools/${encodeURIComponent(slug)}/lookup`, { query });
+  },
+
+  procurementRounds(): Promise<{ rounds: ProcurementRound[] }> {
+    return getJson("/api/public/procurement/rounds");
+  },
+
+  procurementRound(roundId: number): Promise<{ round: ProcurementRound; units: ProcurementUnitRef[] }> {
+    return getJson(`/api/public/procurement/rounds/${roundId}`);
+  },
+
+  procurementForm(roundId: number, unitId: number): Promise<ProcurementForm> {
+    return getJson(`/api/public/procurement/rounds/${roundId}/units/${unitId}`);
+  },
+
+  saveProcurement(
+    roundId: number,
+    unitId: number,
+    items: { code: string; qty: number; note: string }[],
+    generalNote: string,
+  ): Promise<ProcurementSaveResult> {
+    return putJson(`/api/public/procurement/rounds/${roundId}/units/${unitId}`, { items, generalNote });
   },
 
   lookupStudentEmail(studentId: string): Promise<StudentEmailLookupResult> {

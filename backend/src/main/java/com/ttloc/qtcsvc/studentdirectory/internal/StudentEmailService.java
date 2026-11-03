@@ -6,7 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.ttloc.qtcsvc.studentdirectory.internal.StudentEmailDtos.ImportPreview;
@@ -29,13 +33,15 @@ class StudentEmailService {
                 .map(e -> "Dòng " + e.rowNumber() + ": " + e.message())
                 .limit(20)
                 .toList();
-        return new ImportPreview(result.records().size(), errorMessages);
+        Map<String, StudentEmailRecord> unique = dedupe(result.records());
+        Map<String, StudentEmailRecord> existing = existingByStudentId();
+        int updates = (int) unique.keySet().stream().filter(existing::containsKey).count();
+        return new ImportPreview(unique.size(), unique.size() - updates, updates, errorMessages);
     }
 
     /**
-     * Thay the toan bo danh sach hien co bang du lieu trong file (xoa het +
-     * chen lai) - moi lan nhap la 1 ban ghi danh sach day du (vd khi co khoa
-     * moi), khong phai gop them.
+     * Gop them vao danh sach hien co: MSSV chua co thi them moi, MSSV da co thi
+     * cap nhat thong tin theo file. Khong xoa ban ghi nao.
      */
     @Transactional
     ImportResult commit(MultipartFile file) {
@@ -43,9 +49,39 @@ class StudentEmailService {
         if (result.records().isEmpty()) {
             throw new IllegalArgumentException("Không có dòng hợp lệ nào để nhập.");
         }
-        repository.deleteAll();
-        repository.saveAll(result.records());
-        return new ImportResult(result.records().size());
+        Map<String, StudentEmailRecord> existing = existingByStudentId();
+        List<StudentEmailRecord> toSave = new ArrayList<>();
+        int added = 0;
+        int updated = 0;
+        for (StudentEmailRecord r : dedupe(result.records()).values()) {
+            StudentEmailRecord old = existing.get(r.studentId());
+            if (old == null) {
+                toSave.add(r);
+                added++;
+            } else {
+                toSave.add(new StudentEmailRecord(old.id(), r.studentId(), r.fullName(), r.className(), r.major(),
+                        r.majorCode(), r.cohort(), r.email(), r.importedAt()));
+                updated++;
+            }
+        }
+        repository.saveAll(toSave);
+        return new ImportResult(added, updated);
+    }
+
+    private Map<String, StudentEmailRecord> dedupe(List<StudentEmailRecord> records) {
+        Map<String, StudentEmailRecord> unique = new LinkedHashMap<>();
+        for (StudentEmailRecord r : records) {
+            unique.put(r.studentId(), r);
+        }
+        return unique;
+    }
+
+    private Map<String, StudentEmailRecord> existingByStudentId() {
+        Map<String, StudentEmailRecord> map = new HashMap<>();
+        for (StudentEmailRecord r : repository.findAll()) {
+            map.put(r.studentId(), r);
+        }
+        return map;
     }
 
     private StudentEmailExcelParser.ParseResult parseFile(MultipartFile file) {

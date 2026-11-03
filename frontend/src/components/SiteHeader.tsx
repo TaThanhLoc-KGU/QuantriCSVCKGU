@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { useAuth } from "../admin/AuthContext";
 import { useCategories } from "../lib/useCategories";
 import { buildCategoryTree } from "../lib/categoryTree";
 import { useSiteInfo } from "../lib/useSiteInfo";
@@ -31,6 +32,7 @@ export function SiteHeader() {
   const pageTree = buildCategoryTree(pageCategories, (node, ancestorSlugs) => `/trang/${[...ancestorSlugs, node.slug].join("/")}`);
   const tree = [...postTree, ...pageTree];
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, loading: authLoading } = useAuth();
 
   const now = new Date();
   const topLinks = parseLinks(site.topLinks);
@@ -55,9 +57,19 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
-          <p className="tnum hidden items-center py-2 sm:flex">
-            {WEEKDAYS[now.getDay()]}, {formatDate(now.toISOString())}
-          </p>
+          <div className="flex items-stretch divide-x divide-neutral-700">
+            <p className="tnum hidden items-center py-2 pr-3 sm:flex">
+              {WEEKDAYS[now.getDay()]}, {formatDate(now.toISOString())}
+            </p>
+            {!authLoading && (
+              <Link to={user ? "/admin" : "/admin/dang-nhap"} className="flex items-center gap-1.5 py-2 pl-3 font-semibold text-white hover:underline">
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
+                </svg>
+                {user ? "Trang quản trị" : "Đăng nhập"}
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 

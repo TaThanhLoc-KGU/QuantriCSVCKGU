@@ -202,3 +202,47 @@ export interface GalleryItem {
   sortOrder: number;
   active: boolean;
 }
+
+// ---- Mua sam van phong pham theo dot ----
+
+export type ProcurementAudience = "PHONG" | "KHOA";
+
+export interface ProcurementRound {
+  id: number;
+  audience: ProcurementAudience;
+  name: string;
+  deadline: string | null;
+  deadlineDate: string | null;
+  accepting: boolean;
+  showPrevious: boolean;
+  open: boolean;
+  createdAt: string;
+}
+
+export interface ProcurementUnitRef {
+  id: number;
+  code: string;
+  name: string;
+}
+
+export interface ProcurementCatalogItem {
+  code: string;
+  group: string;
+  name: string;
+  unit: string;
+}
+
+export interface ProcurementForm {
+  round: ProcurementRound;
+  unit: ProcurementUnitRef;
+  catalog: ProcurementCatalogItem[];
+  values: Record<string, { qty: number; note: string }>;
+  generalNote: string;
+  updatedAt: string | null;
+}
+
+export interface ProcurementSaveResult {
+  savedAt: string;
+  count: number;
+  totalQty: number;
+}

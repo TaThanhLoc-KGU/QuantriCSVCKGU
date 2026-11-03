@@ -60,7 +60,7 @@ export function StudentEmailsPage() {
     setImportError(null);
     try {
       const result = await adminApi.studentEmails.commitImport(file);
-      setImportedMessage(`Đã thay thế danh sách bằng ${result.importedCount} bản ghi từ file.`);
+      setImportedMessage(`Đã thêm ${result.addedCount} sinh viên mới, cập nhật ${result.updatedCount} sinh viên đã có.`);
       setFile(null);
       setPreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -83,7 +83,7 @@ export function StudentEmailsPage() {
         <h2 className="mb-1 text-sm font-semibold text-neutral-900">Nhập từ Excel</h2>
         <p className="mb-3 text-xs text-neutral-500">
           Chọn file danh sách (cột: Mã sinh viên, Họ và tên, Mã lớp, Ngành, Mã ngành, Khóa, Email). Nhập sẽ{" "}
-          <strong>thay thế toàn bộ</strong> danh sách hiện có — dùng khi có khóa mới hoặc cập nhật lại cả danh sách.
+          <strong>thêm vào</strong> danh sách hiện có: MSSV chưa có thì thêm mới, MSSV đã có thì cập nhật theo file — không xóa ai.
         </p>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -99,14 +99,16 @@ export function StudentEmailsPage() {
           </Button>
           {preview && preview.validCount > 0 && preview.errors.length === 0 && (
             <Button size="sm" onClick={handleCommit} disabled={busy !== null}>
-              {busy === "commit" ? "Đang nhập…" : `Xác nhận thay thế bằng ${preview.validCount} dòng`}
+              {busy === "commit" ? "Đang nhập…" : `Xác nhận nhập ${preview.validCount} dòng`}
             </Button>
           )}
         </div>
 
         {preview && (
           <div className="mt-3 rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm">
-            <p className="text-neutral-700">{preview.validCount} dòng hợp lệ.</p>
+            <p className="text-neutral-700">
+              {preview.validCount} dòng hợp lệ: {preview.newCount} thêm mới, {preview.updateCount} cập nhật.
+            </p>
             {preview.errors.length > 0 && (
               <div className="mt-1.5">
                 <p className="text-urgent-600">Có lỗi ở một số dòng — sửa file rồi xem trước lại:</p>

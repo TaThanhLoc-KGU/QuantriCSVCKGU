@@ -7,10 +7,10 @@ final class StudentEmailDtos {
     private StudentEmailDtos() {
     }
 
-    record ImportPreview(int validCount, List<String> errors) {
+    record ImportPreview(int validCount, int newCount, int updateCount, List<String> errors) {
     }
 
-    record ImportResult(int importedCount) {
+    record ImportResult(int addedCount, int updatedCount) {
     }
 
     record LookupResult(String studentId, String fullName, String className, String major, String email) {

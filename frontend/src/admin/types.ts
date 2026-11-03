@@ -309,11 +309,14 @@ export interface StudentEmailListResponse {
 
 export interface StudentEmailImportPreview {
   validCount: number;
+  newCount: number;
+  updateCount: number;
   errors: string[];
 }
 
 export interface StudentEmailImportResult {
-  importedCount: number;
+  addedCount: number;
+  updatedCount: number;
 }
 
 export interface FeedbackMessage {
@@ -370,3 +373,71 @@ export const REPORT_SECTION_LABELS: Record<string, string> = {
 };
 
 export const REPORT_SECTION_KEYS = Object.keys(REPORT_SECTION_LABELS);
+
+// ---- Mua sam van phong pham ----
+
+export interface ProcurementUnitRow {
+  id: number;
+  audience: string;
+  code: string;
+  name: string;
+  sortOrder: number;
+  active: boolean;
+}
+
+export interface ProcurementItemRow {
+  id: number;
+  audience: string;
+  code: string;
+  groupName: string;
+  name: string;
+  unitLabel: string;
+  sortOrder: number;
+  visible: boolean;
+}
+
+export interface ProcurementStatusRow {
+  unitId: number;
+  unitCode: string;
+  unitName: string;
+  submitted: boolean;
+  itemCount: number;
+  totalQty: number;
+  generalNote: string | null;
+  updatedAt: string | null;
+  timesSaved: number;
+}
+
+export interface ProcurementSummaryRow {
+  code: string;
+  group: string;
+  name: string;
+  unit: string;
+  qtyByUnit: Record<string, number>;
+  total: number;
+}
+
+export interface ProcurementSummary {
+  units: { id: number; code: string; name: string }[];
+  rows: ProcurementSummaryRow[];
+}
+
+export interface ProcurementDetail {
+  unit: { id: number; code: string; name: string };
+  generalNote: string | null;
+  updatedAt: string;
+  timesSaved: number;
+  lines: { code: string; name: string; unit: string; qty: number; note: string | null }[];
+}
+
+export interface ProcurementImportPreview {
+  validCount: number;
+  newCount: number;
+  updateCount: number;
+  errors: string[];
+}
+
+export interface ProcurementImportResult {
+  addedCount: number;
+  updatedCount: number;
+}

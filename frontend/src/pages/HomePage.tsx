@@ -18,6 +18,7 @@ const DEFAULT_SHORTCUTS = [
   { label: "Biểu mẫu", url: "/bieu-mau" },
   { label: "Công khai", url: "/cong-khai" },
   { label: "Gửi văn bản", url: "/gui-van-ban" },
+  { label: "Đăng ký mua sắm", url: "/mua-sam" },
   { label: "Khôi phục tài khoản", url: "/khoi-phuc-tai-khoan" },
   { label: "Tra cứu email sinh viên", url: "/tra-cuu-email" },
   { label: "Hòm thư góp ý", url: "/hom-thu-gop-y" },

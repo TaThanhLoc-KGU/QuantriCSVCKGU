@@ -33,8 +33,7 @@ class StudentEmailAdminController {
 
     /**
      * preview=true (mac dinh): chi doc + kiem tra, tra so dong hop le/loi,
-     * KHONG ghi DB. preview=false: thay the toan bo danh sach hien co bang
-     * du lieu trong file.
+     * KHONG ghi DB. preview=false: them MSSV moi + cap nhat MSSV da co, khong xoa.
      */
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Object importExcel(@RequestParam(defaultValue = "true") boolean preview, @RequestParam("file") MultipartFile file) {
